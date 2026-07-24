@@ -5,6 +5,7 @@ import { Icon } from '../icons'
 import { clearActiveWorkout, loadActiveWorkout, saveActiveWorkout } from '../lib/storage'
 import { clockMS, mmss, nowISO, uid } from '../lib/util'
 import WeightVisual from '../components/WeightVisual'
+import { whip } from '../lib/whip'
 import type { Equipment, LoggedSet, WorkoutSession } from '../types'
 
 const defaultWeight = (eq: Equipment) =>
@@ -43,6 +44,9 @@ export default function Workout() {
   const [restLeft, setRestLeft] = useState(0)
   const [restActive, setRestActive] = useState(false)
   const [restLabel, setRestLabel] = useState('')
+
+  // карточка текущего упражнения — сюда прилетает фирменный «кланк» при записи подхода
+  const curRef = useRef<HTMLDivElement>(null)
 
   // часы тренировки
   useEffect(() => {
@@ -121,6 +125,14 @@ export default function Workout() {
     const cur = logged[currentId!] ?? []
     const set: LoggedSet = { id: uid(), exerciseId: item.exerciseId, setNumber: cur.length + 1, weight, reps, warmup: false, completedAt: nowISO() }
     const next = { ...logged, [currentId!]: [...cur, set] }
+
+    // фирменный «кланк»: амплитуда прогиба от веса; PR (превышение лучшего) — максимум
+    const ex = exerciseById(item.exerciseId)
+    const h = historyTop(item.exerciseId)
+    const repsBased = ex?.equipment === 'Свой вес'
+    const pr = h ? (repsBased ? reps > h.reps : weight > h.weight) : false
+    whip(curRef.current, { weight, reps, repsBased, pr })
+
     setLogged(next)
 
     const doneCount = next[currentId!].length
@@ -201,7 +213,7 @@ export default function Workout() {
 
           const st = weightStep(ex?.equipment ?? 'Штанга')
           return (
-            <div className="exq cur" key={item.id}>
+            <div className="exq cur" key={item.id} ref={curRef}>
               <div className="exq-h">
                 <div className="num">{idx + 1}</div>
                 <div>

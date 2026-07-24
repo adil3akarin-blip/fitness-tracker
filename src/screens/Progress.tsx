@@ -185,7 +185,7 @@ export default function Progress() {
                           return (
                             <div className={'col' + (isLast ? ' last' : '')} key={i}>
                               {showVal && <span className="bv">{p.value}</span>}
-                              <div className="bar" style={{ height: `${hgt}%` }} />
+                              <div className="bar" style={{ height: `${hgt}%`, animationDelay: `${i * 30}ms` }} />
                             </div>
                           )
                         })}
