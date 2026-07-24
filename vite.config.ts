@@ -5,7 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 // без @types/node — точечное объявление, чтобы не тащить зависимость
 declare const process: { env: Record<string, string | undefined> }
 
+const base = process.env.GITHUB_PAGES === 'true' ? '/fitness-tracker/' : '/'
+
 export default defineConfig({
+  base,
   // уважаем PORT из окружения (напр. превью-обёртка), иначе дефолт vite
   server: process.env.PORT ? { port: Number(process.env.PORT), strictPort: true } : undefined,
   plugins: [
@@ -22,7 +25,8 @@ export default defineConfig({
         background_color: '#0B0F17',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: base,
+        scope: base,
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
