@@ -326,10 +326,15 @@ input,select{font-family:inherit}
 .stepper .ctl button:active{background:var(--surface-3)}
 .stepper .n{flex:1;display:flex;align-items:baseline;justify-content:center;gap:4px;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;min-width:0}
 .stepper .n small{color:var(--muted);font-size:12px;font-weight:600}
-.ninp{width:2.8em;background:transparent;border:0;text-align:center;font:inherit;color:var(--text);font-variant-numeric:tabular-nums;padding:3px 0;border-radius:7px}
+.ninp{width:3.2em;background:transparent;border:0;text-align:center;font:inherit;color:var(--text);font-variant-numeric:tabular-nums;padding:3px 0;border-radius:7px}
 .ninp:focus{outline:none;background:rgba(255,255,255,.10)}
 .setdel{margin-left:auto;background:none;border:0;color:var(--dim);display:flex;justify-content:flex-end;font-size:15px;cursor:pointer;padding:2px}
 .setdel:active{color:var(--red)}
+.datepick{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--glass-brd);border-radius:16px;box-shadow:var(--glass-hi)}
+.datepick>span{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;font-weight:600}
+.datepick>span .ic{color:var(--muted)}
+.datepick input{background:rgba(3,7,14,.38);border:1px solid rgba(255,255,255,.09);border-radius:12px;color:var(--text);font:inherit;font-size:14px;font-weight:600;padding:8px 10px}
+.datepick input::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .wk-discard{width:100%;margin-top:10px;background:none;border:0;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;padding:8px}
 .wk-discard:active{opacity:.7}
 .restbar{position:fixed;left:50%;transform:translateX(-50%) translateY(180%);bottom:calc(var(--tab-float) + var(--sab));width:min(432px,calc(100% - 28px - var(--sal) - var(--sar)));background:radial-gradient(140% 160% at 20% -30%,rgba(52,217,127,.30),transparent 58%),rgba(13,22,18,.66);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);border:1px solid rgba(52,217,127,.38);border-radius:26px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:40;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 44px rgba(1,4,12,.55);transition:transform .45s cubic-bezier(.32,1.4,.45,1)}
@@ -425,7 +430,7 @@ input,select{font-family:inherit}
 /* Гантель */
 .wv-db{display:flex;align-items:center;justify-content:center;height:110px}
 .wv-db-head{background:#4B5563;border:1px solid rgba(0,0,0,.4);border-radius:8px;display:grid;place-items:center;flex:none;transition:width .25s var(--ease),height .25s var(--ease)}
-.wv-db-head span{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);line-height:1}
+.wv-db-head span{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .wv-db-bar{width:54px;height:9px;background:#6E757D;border-radius:3px;flex:none}
 
 /* Весовой стек */

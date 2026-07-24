@@ -17,6 +17,18 @@ const parseNum = (v: string, fallback: number) => {
   const n = parseFloat(v.replace(',', '.'))
   return isNaN(n) ? fallback : n
 }
+// yyyy-mm-dd в локальной зоне — значение для <input type="date">
+const dateInputValue = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+// перенести момент ISO на выбранную календарную дату, сохранив время суток
+const rebaseToDate = (iso: string, ymd: string) => {
+  const [y, m, d] = ymd.split('-').map(Number)
+  const r = new Date(iso)
+  r.setFullYear(y, m - 1, d)
+  return r.toISOString()
+}
 
 export default function Workout() {
   const { programId, dayId } = useParams()
@@ -43,6 +55,12 @@ export default function Workout() {
   const [currentId, setCurrentId] = useState<string | undefined>(saved?.currentId ?? items[0]?.id)
   const [weight, setWeight] = useState(20)
   const [reps, setReps] = useState(5)
+  // текстовый буфер поля веса — позволяет печатать дробные («12,5») без «схлопывания»
+  const [weightStr, setWeightStr] = useState('')
+  const editingWeight = useRef(false)
+  // дата тренировки: по умолчанию сегодня, можно записать задним числом
+  const [sessionDate, setSessionDate] = useState(() => dateInputValue(new Date(startedAt.current)))
+  const todayInput = dateInputValue(new Date())
 
   const [restLeft, setRestLeft] = useState(0)
   const [restTotal, setRestTotal] = useState(0)
@@ -108,6 +126,11 @@ export default function Workout() {
     setReps(item.repsMin)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId])
+
+  // держим буфер поля веса в синхроне, пока пользователь не печатает в нём вручную
+  useEffect(() => {
+    if (!editingWeight.current) setWeightStr(String(toDisplayWeight(weight, units)))
+  }, [weight, units])
 
   if (!program || !day || items.length === 0) {
     return (
@@ -177,10 +200,12 @@ export default function Workout() {
       nav('/')
       return
     }
+    // если выбрана другая дата — переносим начало и конец на неё, сохраняя длительность
     const session: WorkoutSession = {
       id: uid(), ownerId: data.userId, programId: program.id, dayId: day.id,
       programName: program.name, dayLabel: `День ${day.letter}`,
-      startedAt: startedAt.current, finishedAt: nowISO(), sets: allSets,
+      startedAt: rebaseToDate(startedAt.current, sessionDate),
+      finishedAt: rebaseToDate(nowISO(), sessionDate), sets: allSets,
     }
     addSession(session)
     clearActiveWorkout()
@@ -251,9 +276,15 @@ export default function Workout() {
                         <div className="ctl">
                           <button onClick={() => { setWeight((w) => Math.max(0, fromDisplayWeight(Math.max(0, toDisplayWeight(w, units) - stepD), units))); pop(wNumRef.current) }}><Icon name="minus" /></button>
                           <div className="n" ref={wNumRef}>
-                            <input className="ninp" type="text" inputMode="decimal" value={toDisplayWeight(weight, units)}
-                              onFocus={(e) => e.target.select()}
-                              onChange={(e) => setWeight(Math.max(0, fromDisplayWeight(parseNum(e.target.value, 0), units)))} />
+                            <input className="ninp" type="text" inputMode="decimal" value={weightStr}
+                              onFocus={(e) => { editingWeight.current = true; e.target.select() }}
+                              onChange={(e) => {
+                                const raw = e.target.value
+                                setWeightStr(raw)
+                                const n = parseFloat(raw.replace(',', '.'))
+                                if (!isNaN(n)) setWeight(Math.max(0, fromDisplayWeight(n, units)))
+                              }}
+                              onBlur={() => { editingWeight.current = false; setWeightStr(String(toDisplayWeight(weight, units))) }} />
                             <small>{weightLabel(units)}</small>
                           </div>
                           <button onClick={() => { setWeight((w) => fromDisplayWeight(toDisplayWeight(w, units) + stepD, units)); pop(wNumRef.current) }}><Icon name="plus" /></button>
@@ -279,6 +310,12 @@ export default function Workout() {
             </div>
           )
         })}
+
+        <label className="datepick">
+          <span><Icon name="calendar" style={{ fontSize: 14 }} /> Дата тренировки</span>
+          <input type="date" value={sessionDate} max={todayInput}
+            onChange={(e) => setSessionDate(e.target.value || todayInput)} />
+        </label>
 
         <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={finish}>Завершить тренировку</button>
         <button className="wk-discard" onClick={discard}>Отменить тренировку</button>

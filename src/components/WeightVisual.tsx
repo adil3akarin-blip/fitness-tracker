@@ -139,10 +139,13 @@ function Dumbbell({ weight, units }: { weight: number; units: Units }) {
   // масштаб визуала откалиброван под кг; в фунтах числа крупнее — сжимаем коэффициенты
   const k = units === 'lb' ? 0.45 : 1
   const h = Math.min(104, 40 + weight * 1.6 * k)
-  const w = Math.min(40, 16 + weight * 0.45 * k)
+  const label = weight >= 2 ? ruNum(weight) : ''
+  // ширина головки растёт с весом, но не уже подписи — дробные («12,5») должны влезать
+  const needW = label ? label.length * 7 + 10 : 0
+  const w = Math.min(46, Math.max(16 + weight * 0.45 * k, needW))
   const head = (
     <div className="wv-db-head" style={{ height: h, width: w }}>
-      {weight >= 2 ? <span>{ruNum(weight)}</span> : null}
+      {label ? <span>{label}</span> : null}
     </div>
   )
   return (
