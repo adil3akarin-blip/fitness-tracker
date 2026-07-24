@@ -95,7 +95,7 @@ export default function Workout() {
 
   if (!program || !day || items.length === 0) {
     return (
-      <div className="app">
+      <div className="app plain">
         <div className="screen">
           <div className="empty"><Icon name="dumbbell" /><div className="et">Тренировка недоступна</div>
             <button className="btn btn-ghost" style={{ marginTop: 14 }} onClick={() => nav('/')}>На главную</button>
@@ -171,8 +171,8 @@ export default function Workout() {
   }
 
   return (
-    <div className="app">
-      <div className="screen" style={{ paddingBottom: restActive ? 110 : 24 }}>
+    <div className="app plain">
+      <div className={'screen' + (restActive ? ' rest-open' : '')}>
         <div className="wk-top">
           <button className="x" onClick={close}><Icon name="x" /></button>
           <div className="tt">День {day.letter} · {day.name}<div className="s">{program.name}</div></div>
