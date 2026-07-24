@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fitness Tracker — макет</title>
+<style>
+  :root{
+    --bg:#0B0F17;
+    --surface:#141A24;
+    --surface-2:#1B2330;
+    --surface-3:#222C3B;
+    --border:#232C3B;
+    --text:#E7ECF3;
+    --muted:#8B95A7;
+    --dim:#5B6576;
+    --green:#22C55E;
+    --green-soft:rgba(34,197,94,.14);
+    --green-ink:#04140b;
+    --violet:#8B5CF6;
+    --violet-bright:#A78BFA;
+    --amber:#F59E0B;
+    --red:#F87171;
+    --r-card:16px;
+    --r-ctrl:12px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    /* типографическая шкала */
+    --fs-h1:22px; --fs-hero:25px; --fs-title:15px; --fs-body:14px; --fs-sm:12.5px; --fs-xs:11px;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font);
+    background:radial-gradient(1200px 600px at 50% -10%, #10192a 0%, transparent 60%), var(--bg);
+    color:var(--text);
+    line-height:1.45;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:28px 16px 40px;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+  button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+  .caption{color:var(--dim);font-size:13px;margin:14px 0 0;text-align:center;max-width:420px}
+
+  /* ---- Иконки ---- */
+  .ic{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic.fill{fill:currentColor;stroke:none}
+
+  /* ---- Телефон ---- */
+  .phone{
+    position:relative;
+    width:402px;height:864px;max-height:92vh;
+    background:var(--bg);
+    border:1px solid #2a3446;
+    border-radius:38px;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.8), inset 0 0 0 6px #05080e;
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#05080e;border-radius:0 0 16px 16px;z-index:40}
+  .statusbar{height:34px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 4px;font-size:12px;color:var(--muted);flex:none}
+  .statusbar .dots{letter-spacing:2px}
+
+  .screens{flex:1;overflow:hidden;position:relative}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:6px 16px 96px;display:none;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+  .screen.active{display:block;animation:screenIn .28s var(--ease)}
+  @keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ---- Общие ---- */
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 0 14px}
+  .appbar h1{font-size:var(--fs-h1);margin:0;letter-spacing:-.02em;line-height:1.1}
+  .appbar .sub{color:var(--muted);font-size:13px;margin-top:3px}
+  .icon-btn{width:38px;height:38px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;font-size:17px;transition:background .15s, transform .08s}
+  .icon-btn:active{background:var(--surface-3);transform:scale(.94)}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+  .card + .card{margin-top:12px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .card-head .t{display:flex;align-items:center;gap:9px;font-weight:600;font-size:var(--fs-title)}
+  .card-head .t .ic{color:var(--green);font-size:17px}
+
+  .sec-label{color:var(--dim);font-size:var(--fs-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:22px 2px 10px}
+
+  .btn{border:0;width:100%;padding:14px;border-radius:var(--r-ctrl);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:transform .08s, filter .15s, background .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--green);color:var(--green-ink)}
+  .btn-primary:active{filter:brightness(.94)}
+  .btn-primary .ic{font-size:16px}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--border);font-weight:600}
+  .btn-ghost:active{background:var(--surface-3)}
+  .btn-ghost .ic{font-size:16px;color:var(--muted)}
+  .btn-sm{padding:10px 14px;width:auto;border-radius:10px;font-size:14px}
+
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px}
+  .seg button{border:0;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:999px;cursor:pointer;transition:color .15s, background .2s var(--ease)}
+  .seg button.on{background:var(--green);color:var(--green-ink)}
+
+  .chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;color:var(--muted)}
+
+  /* ---- Home ---- */
+  .hero{background:linear-gradient(150deg,#17233a 0%, #141A24 55%);border:1px solid #26364f;border-radius:var(--r-card);padding:18px;position:relative;overflow:hidden}
+  .hero .tag{display:inline-flex;align-items:center;gap:6px;color:var(--violet-bright);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .hero .tag .ic{font-size:14px}
+  .hero h2{margin:8px 0 3px;font-size:var(--fs-hero);letter-spacing:-.02em;line-height:1.15}
+  .hero .meta{color:var(--muted);font-size:13px;margin-bottom:16px;line-height:1.4}
+  .hero .exs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px}
+  .stat .v{font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .stat .v small{font-size:12px;color:var(--muted);font-weight:600}
+  .stat .k{color:var(--muted);font-size:var(--fs-xs);margin-top:4px}
+
+  .pr-item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);margin:0 -4px;border-radius:8px;transition:background .15s}
+  .pr-item:last-child{border-bottom:0}
+  .pr-item:active{background:var(--surface-2)}
+  .pr-emoji{width:38px;height:38px;border-radius:11px;background:var(--green-soft);display:grid;place-items:center;flex:none}
+  .pr-emoji .ic{font-size:19px;color:var(--green)}
+  .pr-item .n{font-weight:600;font-size:var(--fs-body)}
+  .pr-item .d{color:var(--muted);font-size:12px;margin-top:1px}
+  .pr-item .val{margin-left:auto;font-weight:700;color:var(--green)}
+
+  /* ---- Programs ---- */
+  .prog{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
+  .prog + .prog{margin-top:12px}
+  .prog-head{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer}
+  .prog-cover{width:44px;height:44px;border-radius:12px;background:linear-gradient(140deg,var(--violet),#6d28d9);display:grid;place-items:center;color:#fff;flex:none}
+  .prog-cover .ic{font-size:20px}
+  .prog-head .nm{font-weight:700}
+  .prog-head .mt{color:var(--muted);font-size:var(--fs-sm);margin-top:2px}
+  .caret{margin-left:auto;color:var(--dim);font-size:16px;transition:transform .25s var(--ease)}
+  .caret.up{transform:rotate(180deg)}
+  .days{border-top:1px solid var(--border);padding:6px 8px 10px}
+  .day{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:10px;transition:background .15s}
+  .day:active{background:var(--surface-2)}
+  .badge{width:30px;height:30px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--muted);flex:none}
+  .day .dn{font-weight:600;font-size:var(--fs-body)}
+  .day .de{color:var(--muted);font-size:12px;margin-top:1px}
+  .day .go{margin-left:auto;color:var(--green);font-size:13px;font-weight:700;display:flex;align-items:center;gap:3px}
+
+  /* ---- Progress ---- */
+  .summary{display:flex;gap:20px;align-items:baseline;margin:2px 0 16px}
+  .summary .big{font-size:26px;font-weight:700;letter-spacing:-.02em}
+  .summary .up{color:var(--green);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:3px}
+  .summary .lbl{color:var(--muted);font-size:12px;margin-top:2px}
+  .chart{display:flex;align-items:flex-end;gap:6px;height:170px;padding-top:22px}
+  .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative}
+  .col .bv{position:absolute;top:-4px;transform:translateY(-100%);font-size:9.5px;color:var(--muted);white-space:nowrap}
+  .bar{width:100%;max-width:20px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--violet-bright),var(--violet));opacity:.55;transition:height .5s var(--ease), opacity .3s}
+  .col.last .bar{opacity:1;background:linear-gradient(180deg,#c4b5fd,var(--violet-bright))}
+  .xaxis{display:flex;justify-content:space-between;color:var(--dim);font-size:11px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+  .pr3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .pr3 .b{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 12px;text-align:center}
+  .pr3 .b .v{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .pr3 .b .v small{font-size:11px;color:var(--muted);font-weight:600}
+  .pr3 .b .k{color:var(--muted);font-size:11px;margin-top:4px}
+  .ex-pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+  .ex-pills::-webkit-scrollbar{display:none}
+  .ex-pills .p{white-space:nowrap;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .ex-pills .p.on{background:var(--green-soft);border-color:rgba(34,197,94,.4);color:var(--green)}
+
+  /* ---- Journal ---- */
+  .weekstrip{display:flex;gap:6px;margin-bottom:8px}
+  .wd{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 0;text-align:center}
+  .wd .w{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+  .wd .n{font-weight:700;margin-top:2px;font-size:15px}
+  .wd.done{border-color:rgba(34,197,94,.45)}
+  .wd.done .dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0}
+  .wd.today{background:var(--green-soft);border-color:var(--green)}
+  .log{display:flex;align-items:center;gap:13px;padding:14px 4px;margin:0 -4px;border-bottom:1px solid var(--border);border-radius:8px;transition:background .15s}
+  .log:last-child{border-bottom:0}
+  .log:active{background:var(--surface-2)}
+  .log .dcol{width:44px;text-align:center;flex:none}
+  .log .dcol .dd{font-size:18px;font-weight:800;line-height:1}
+  .log .dcol .dm{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .log .body .nm{font-weight:600;font-size:14.5px}
+  .log .body .mt{color:var(--muted);font-size:12px;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+  .log .body .mt span{display:inline-flex;align-items:center;gap:3px}
+  .log .vol{margin-left:auto;text-align:right}
+  .log .vol .v{font-weight:700;font-size:14px}
+  .log .vol .k{color:var(--muted);font-size:11px}
+
+  /* ---- Bottom nav ---- */
+  .tabbar{flex:none;display:flex;background:rgba(11,15,23,.92);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  .tab{flex:1;background:none;border:0;color:var(--dim);font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0;cursor:pointer;transition:color .15s}
+  .tab .ic{font-size:22px;transition:transform .12s var(--ease)}
+  .tab:active .ic{transform:scale(.88)}
+  .tab.on{color:var(--green)}
+
+  /* ---- Active workout ---- */
+  .wk-top{display:flex;align-items:center;gap:12px;padding:8px 0 12px}
+  .wk-top .x{width:36px;height:36px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;font-size:17px}
+  .wk-top .x:active{background:var(--surface-3)}
+  .wk-top .tt{font-weight:700}
+  .wk-top .tt .s{color:var(--muted);font-size:12px;font-weight:500}
+  .wk-top .clock{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--green);font-weight:700;background:var(--green-soft);padding:6px 11px;border-radius:999px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
+  .wk-progress{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-bottom:14px}
+  .wk-progress > i{display:block;height:100%;width:40%;background:var(--green);border-radius:99px;transition:width .4s var(--ease)}
+  .exq{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  .exq.done{opacity:.55}
+  .exq-h{display:flex;align-items:center;gap:11px;padding:13px 14px}
+  .exq-h .num{width:26px;height:26px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted);flex:none}
+  .exq.done .num{background:var(--green);color:var(--green-ink)}
+  .exq-h .nm{font-weight:600;font-size:14.5px}
+  .exq-h .tg{color:var(--muted);font-size:12px}
+  .exq-h .st{margin-left:auto;color:var(--muted);font-size:12px}
+  .exq.cur{border-color:#2f6b45;box-shadow:0 0 0 1px rgba(34,197,94,.25)}
+  .setrow{display:grid;grid-template-columns:34px 1fr 1fr 32px;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--border);font-size:14px}
+  .setrow .si{color:var(--dim);font-weight:700;font-size:13px}
+  .setrow .prev{color:var(--dim);font-size:12px}
+  .setrow.filled .check{color:var(--green)}
+  .setrow .check{margin-left:auto;color:var(--dim);display:flex;justify-content:flex-end}
+  .setrow .val{font-weight:600;font-variant-numeric:tabular-nums}
+  .logger{border-top:1px solid var(--border);padding:14px;background:var(--surface-2)}
+  .stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .stepper .grp{flex:1}
+  .stepper .lab{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;text-align:center}
+  .stepper .ctl{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .stepper .ctl button{width:44px;height:44px;border:0;background:transparent;color:var(--green);font-size:18px;cursor:pointer;display:grid;place-items:center;transition:background .12s}
+  .stepper .ctl button:active{background:var(--surface-3)}
+  .stepper .n{flex:1;text-align:center;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stepper .n small{color:var(--muted);font-size:12px;font-weight:600}
+  .restbar{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#132a1c,#0e1f16);border-top:1px solid rgba(34,197,94,.4);padding:14px 16px calc(14px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:14px;z-index:30;transform:translateY(120%);transition:transform .35s var(--ease)}
+  .restbar.show{transform:translateY(0)}
+  .restbar .ring{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green);min-width:74px}
+  .restbar .lab{font-size:12px;color:var(--muted)}
+  .restbar .lab b{color:var(--text);display:block;font-size:14px}
+  .restbar .acts{margin-left:auto;display:flex;gap:8px}
+  .restbar .acts button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer}
+  .restbar .acts button:active{background:rgba(255,255,255,.12)}
+  .restbar .acts .skip{background:var(--green);color:var(--green-ink);border-color:var(--green)}
+
+  /* ---- Доп. экраны ---- */
+  .appbar.push{justify-content:flex-start;gap:12px}
+  .appbar.push h1{font-size:19px}
+  .back{width:36px;height:36px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;font-size:18px;flex:none;cursor:pointer;transition:background .12s}
+  .back:active{background:var(--surface-3)}
+  .mini-edit{width:34px;height:34px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:grid;place-items:center}
+  .mini-edit:active{background:var(--surface-3)}
+  .search-wrap{position:relative;margin-bottom:12px}
+  .search-wrap .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:16px;pointer-events:none}
+  .search{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 38px;color:var(--text);font-family:inherit;font-size:14px}
+  .search::placeholder{color:var(--dim)}
+  .search:focus{outline:none;border-color:rgba(34,197,94,.5)}
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .filters .f{white-space:nowrap;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .filters .f.on{background:var(--green-soft);border-color:rgba(34,197,94,.4);color:var(--green)}
+  .exrow{display:flex;align-items:center;gap:12px;padding:12px 4px;margin:0 -4px;border-bottom:1px solid var(--border);border-radius:8px;transition:background .15s}
+  .exrow:last-child{border-bottom:0}
+  .exrow:active{background:var(--surface-2)}
+  .exrow .eic{width:40px;height:40px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;color:var(--muted);flex:none}
+  .exrow .eic .ic{font-size:19px}
+  .exrow .en{font-weight:600;font-size:14px}
+  .exrow .em{color:var(--muted);font-size:12px;margin-top:2px;display:flex;gap:6px;align-items:center}
+  .exrow .add{margin-left:auto;color:var(--green);font-size:22px;cursor:pointer;display:grid;place-items:center}
+  .tag-mine{background:var(--violet);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+  .switch{width:44px;height:26px;border-radius:999px;background:var(--surface-3);position:relative;cursor:pointer;transition:background .2s;flex:none}
+  .switch.on{background:var(--green)}
+  .switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s var(--ease)}
+  .switch.on i{left:21px}
+  .srow{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .srow:last-child{border-bottom:0}
+  .srow .sk{font-weight:600;font-size:14px}
+  .srow .sd{color:var(--muted);font-size:12px;margin-top:2px}
+  .srow .sr{margin-left:auto}
+  .srow .sr.chev{color:var(--muted);font-size:16px;display:flex}
+  .srow .seg button{font-size:11.5px;padding:5px 10px}
+  .srow.danger .sk{color:var(--red)}
+  .lbadge{width:34px;height:34px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center;font-weight:700;color:var(--muted);flex:none}
+  .plan{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--surface-2);margin-bottom:8px}
+  .plan .pn{font-weight:600;font-size:13.5px;flex:1;min-width:0}
+  .plan .pn small{display:block;color:var(--muted);font-weight:500;font-size:11px;margin-top:2px}
+  .setpill{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--muted);white-space:nowrap}
+  .setpill b{color:var(--text)}
+  .plan .rm{color:var(--dim);font-size:15px;cursor:pointer;padding-left:2px;display:flex}
+  .field{margin-bottom:12px}
+  .field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+  .field input,.field select{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 12px;color:var(--text);font-family:inherit;font-size:14px}
+  .field input:focus,.field select:focus{outline:none;border-color:rgba(34,197,94,.5)}
+
+  /* ---- Скелетон загрузки ---- */
+  .skel{background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);background-size:400% 100%;animation:shimmer 1.25s infinite linear;border-radius:8px}
+  @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+
+  /* ---- PR-момент (вау-эффект) ---- */
+  .pr-burst{position:absolute;inset:0;z-index:50;pointer-events:none;overflow:hidden;display:none}
+  .pr-burst.show{display:block}
+  .confetti{position:absolute;top:-18px;width:9px;height:14px;border-radius:2px;will-change:transform,opacity;animation:confFall linear forwards}
+  @keyframes confFall{0%{transform:translateY(0) rotate(0);opacity:1}85%{opacity:1}100%{transform:translateY(920px) rotate(720deg);opacity:0}}
+  .pr-card{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);opacity:0;
+    background:linear-gradient(160deg,#15271b,#101a13);border:1px solid rgba(34,197,94,.5);
+    box-shadow:0 0 0 1px rgba(34,197,94,.22),0 30px 60px -20px rgba(0,0,0,.7),0 0 46px rgba(34,197,94,.28);
+    border-radius:22px;padding:24px 28px;text-align:center;min-width:230px}
+  .pr-card.pop{animation:prPop 2s var(--ease) forwards}
+  @keyframes prPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+    12%{opacity:1;transform:translate(-50%,-50%) scale(1.07)}22%{transform:translate(-50%,-50%) scale(1)}
+    82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-53%) scale(.96)}}
+  .pr-card .medal{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;
+    background:radial-gradient(circle at 50% 34%,rgba(34,197,94,.4),rgba(34,197,94,.06));border:1px solid rgba(34,197,94,.5)}
+  .pr-card .medal .ic{font-size:32px;color:var(--green)}
+  .pr-card.pop .medal{animation:medalSpin 1.9s var(--ease)}
+  @keyframes medalSpin{0%{transform:rotate(-25deg) scale(.5)}18%{transform:rotate(8deg) scale(1.12)}30%{transform:rotate(0) scale(1)}}
+  .pr-card .lead{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+  .pr-card .exn{font-size:16px;font-weight:700;margin-top:7px}
+  .pr-card .big{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+  .pr-card .sub{color:var(--green);font-size:12.5px;font-weight:600;margin-top:7px}
+  @keyframes rowPr{0%{background:transparent}25%{background:var(--green-soft)}100%{background:transparent}}
+  .setrow.pr-hit{animation:rowPr 1.9s var(--ease)}
+  .setrow .prbadge{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-weight:700;font-size:12px}
+  .setrow .prbadge .ic{font-size:13px}
+
+  /* ---- Ручной ввод веса/повторов ---- */
+  .stepper .n{display:flex;align-items:center;justify-content:center;gap:3px;overflow:hidden}
+  .nin{background:transparent;border:0;color:var(--text);font-family:inherit;font-size:19px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;width:66px;max-width:100%;padding:6px 0;border-bottom:1px solid transparent;transition:border-color .15s}
+  .nin:focus{outline:none;border-bottom-color:rgba(34,197,94,.6)}
+
+  /* ---- Меню строки (журнал) ---- */
+  .row-kebab{flex:none;width:30px;height:30px;margin-left:6px;border-radius:8px;background:transparent;border:0;color:var(--dim);display:grid;place-items:center;font-size:17px;cursor:pointer;transition:background .12s,color .12s}
+  .row-kebab:active{background:var(--surface-2);color:var(--muted)}
+  .log.removing,.setrow.removing{opacity:0;transform:translateX(24px);transition:opacity .2s var(--ease),transform .2s var(--ease)}
+
+  /* ---- Редактирование сессии ---- */
+  .setrow.erow{display:flex;align-items:center;gap:8px}
+  .setrow.erow .si{width:auto}
+  .einwrap{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;flex:1}
+  .ein{width:60px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-family:inherit;font-size:14px;text-align:center;font-variant-numeric:tabular-nums}
+  .ein:focus{outline:none;border-color:rgba(34,197,94,.55)}
+  .del-set{flex:none;margin-left:auto;width:32px;height:32px;border-radius:8px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);display:grid;place-items:center;cursor:pointer}
+  .del-set:active{background:rgba(248,113,113,.22)}
+  .del-set .ic{font-size:15px}
+
+  /* ---- Нижний лист действий ---- */
+  .scrim{position:absolute;inset:0;background:rgba(3,6,12,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border:1px solid var(--border);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 14px calc(14px + env(safe-area-inset-bottom));transform:translateY(115%);transition:transform .32s var(--ease);z-index:61}
+  .sheet.show{transform:translateY(0)}
+  .sheet-grab{width:38px;height:4px;border-radius:99px;background:var(--surface-3);margin:6px auto 10px}
+  .sheet-item{display:flex;align-items:center;gap:13px;width:100%;background:transparent;border:0;color:var(--text);font-family:inherit;font-size:15px;font-weight:600;padding:15px 8px;border-radius:12px;cursor:pointer;text-align:left}
+  .sheet-item:active{background:var(--surface-2)}
+  .sheet-item .ic{font-size:19px;color:var(--muted)}
+  .sheet-item.danger{color:var(--red)} .sheet-item.danger .ic{color:var(--red)}
+
+  /* ---- Диалог подтверждения ---- */
+  .dlg{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;width:300px;max-width:84%;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;z-index:71;transition:opacity .2s,transform .22s var(--ease);box-shadow:0 30px 70px -20px rgba(0,0,0,.75)}
+  .dlg.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .dlg .t{font-weight:700;font-size:16px}
+  .dlg .d{color:var(--muted);font-size:13px;margin:8px 0 18px;line-height:1.5}
+  .dlg-acts{display:flex;gap:10px}
+  .dlg-acts .btn{padding:11px;font-size:14px}
+  .btn-danger{background:var(--red);color:#2a0808}
+  .btn-danger:active{filter:brightness(.94)}
+
+  .hidden{display:none!important}
+  @media(max-width:440px){
+    body{padding:0}
+    .phone{width:100vw;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none;
+      padding-top:env(safe-area-inset-top)}   /* отступ под «чёлку» */
+    .notch{display:none}
+    .statusbar{display:none}                   /* на устройстве видна реальная строка статуса */
+    .caption{display:none}
+    /* нижний отступ под home-indicator (там, где нет таббара/рестбара) */
+    .screen{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= ИКОНКИ (line, Lucide-style) ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol>
+  <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M4 8v8M7 6v12M17 6v12M20 8v8M7 12h10"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-1.6-1-4-1.5-6-1.5S2 5 2 5v13s2-.5 4-.5 4.4.5 6 1.5"/><path d="M12 6c1.6-1 4-1.5 6-1.5S22 5 22 5v13s-2-.5-4-.5-4.4.5-6 1.5"/><path d="M12 6v13"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2.5-4.5C9.5 9.5 11 8 12 3z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 6"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.5-5.7L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.5 5.7L4 16"/><path d="M4 20v-4h4"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L20 8l-4-4L4 16z"/><path d="M14 6l4 4"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6"/></symbol>
+</defs></svg>
+
+<div class="phone" id="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span class="dots">●●● ▮</span></div>
+
+  <div class="screens">
+
+    <!-- ============ СЕГОДНЯ ============ -->
+    <section id="home" class="screen active">
+      <div class="appbar">
+        <div><h1>Привет 👋</h1><div class="sub">Среда, 23 июля</div></div>
+        <button class="icon-btn" onclick="openScreen('settings','home')"><svg class="ic"><use href="#i-gear"/></svg></button>
+      </div>
+
+      <div class="hero">
+        <div class="tag"><svg class="ic"><use href="#i-clock"/></svg> Следующая тренировка</div>
+        <h2>Full Body · День B</h2>
+        <div class="meta">4 упражнения · ~50 мин · последний раз 5 дней назад</div>
+        <div class="exs">
+          <span class="chip">Становая</span><span class="chip">Жим стоя</span><span class="chip">Подтягивания</span><span class="chip">Гиперэкстензия</span>
+        </div>
+        <button class="btn btn-primary" onclick="startWorkout()"><svg class="ic fill"><use href="#i-play"/></svg> Начать тренировку</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="v">3</div><div class="k">за неделю</div></div>
+        <div class="stat"><div class="v">5 <small>нед</small></div><div class="k">серия</div></div>
+        <div class="stat"><div class="v">12.4<small> т</small></div><div class="k">объём/нед</div></div>
+      </div>
+
+      <div class="sec-label">Недавние рекорды</div>
+      <div class="card">
+        <div class="pr-item"><div class="pr-emoji"><svg class="ic"><use href="#i-award"/></svg></div><div><div class="n">Жим лёжа</div><div class="d">18 июля · новый рабочий макс</div></div><div class="val">85 кг</div></div>
+        <div class="pr-item"><div class="pr-emoji" style="background:rgba(245,158,11,.14)"><svg class="ic" style="color:var(--amber)"><use href="#i-flame"/></svg></div><div><div class="n">Приседания</div><div class="d">14 июля · +5 кг за месяц</div></div><div class="val">120 кг</div></div>
+        <div class="pr-item"><div class="pr-emoji"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="n">Подтягивания</div><div class="d">12 июля · макс повторений</div></div><div class="val">12 раз</div></div>
+      </div>
+    </section>
+
+    <!-- ============ ПРОГРАММЫ ============ -->
+    <section id="programs" class="screen">
+      <div class="appbar">
+        <div><h1>Программы</h1><div class="sub">Твои планы тренировок</div></div>
+        <button class="icon-btn" onclick="openScreen('editor','programs')"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </div>
+
+      <div class="prog">
+        <div class="prog-head" onclick="toggleDays(this)">
+          <div class="prog-cover"><svg class="ic"><use href="#i-folder"/></svg></div>
+          <div><div class="nm">Full Body</div><div class="mt">3 дня · 3× в неделю · активна</div></div>
+          <span class="caret up"><svg class="ic"><use href="#i-chev-d"/></svg></span>
+        </div>
+        <div class="days">
+          <div class="day"><div class="badge">A</div><div><div class="dn">День A · Присед-фокус</div><div class="de">Присед, жим лёжа, тяга, бицепс</div></div><div class="go">Начать <svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+          <div class="day"><div class="badge">B</div><div><div class="dn">День B · Тяга-фокус</div><div class="de">Становая, жим стоя, подтягивания…</div></div><div class="go">Начать <svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+          <div class="day"><div class="badge">C</div><div><div class="dn">День C · Объём</div><div class="de">Фронт-присед, жим гантелей, тяга…</div></div><div class="go">Начать <svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="openScreen('editor','programs')"><svg class="ic"><use href="#i-pencil"/></svg> Изменить программу</button>
+        </div>
+      </div>
+
+      <div class="prog">
+        <div class="prog-head" onclick="toggleDays(this)">
+          <div class="prog-cover" style="background:linear-gradient(140deg,#0ea5e9,#2563eb)"><svg class="ic"><use href="#i-dumbbell"/></svg></div>
+          <div><div class="nm">Верх / Низ</div><div class="mt">2 дня · черновик</div></div>
+          <span class="caret"><svg class="ic"><use href="#i-chev-d"/></svg></span>
+        </div>
+        <div class="days" style="display:none">
+          <div class="day"><div class="badge">В</div><div><div class="dn">Верх тела</div><div class="de">Жим, тяга, плечи, руки</div></div><div class="go">Начать <svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+          <div class="day"><div class="badge">Н</div><div><div class="dn">Низ тела</div><div class="de">Присед, становая, икры</div></div><div class="go">Начать <svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" style="margin-top:14px" onclick="openScreen('editor','programs')"><svg class="ic"><use href="#i-plus"/></svg> Создать программу</button>
+
+      <div class="sec-label">Каталог упражнений</div>
+      <div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openScreen('catalog','programs')">
+        <div class="eic" style="width:40px;height:40px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;color:var(--muted)"><svg class="ic" style="font-size:19px"><use href="#i-dumbbell"/></svg></div>
+        <div><div style="font-weight:600;font-size:14px">148 упражнений</div><div style="color:var(--muted);font-size:12px">Базовые + твои. Добавляй свои</div></div>
+        <span style="margin-left:auto;color:var(--dim);display:flex"><svg class="ic" style="font-size:16px"><use href="#i-chev-r"/></svg></span>
+      </div>
+    </section>
+
+    <!-- ============ ПРОГРЕСС ============ -->
+    <section id="progress" class="screen">
+      <div class="appbar"><div><h1>Прогресс</h1><div class="sub">Рост нагрузки по упражнениям</div></div></div>
+
+      <div class="ex-pills" id="exPills">
+        <div class="p on" onclick="pickEx(this,'bench')">Жим лёжа</div>
+        <div class="p" onclick="pickEx(this,'squat')">Приседания</div>
+        <div class="p" onclick="pickEx(this,'dead')">Становая</div>
+        <div class="p" onclick="pickEx(this,'ohp')">Жим стоя</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="t"><svg class="ic"><use href="#i-trend"/></svg><span id="chTitle">Жим лёжа</span></div>
+          <div class="seg" id="rangeSeg">
+            <button onclick="setRange(this)" class="on">30д</button>
+            <button onclick="setRange(this)">90д</button>
+            <button onclick="setRange(this)">Всё</button>
+          </div>
+        </div>
+
+        <!-- skeleton загрузки -->
+        <div id="progSkel">
+          <div class="skel" style="height:26px;width:110px;margin:2px 0 20px"></div>
+          <div class="chart">
+            <div class="col"><div class="skel" style="width:20px;height:38%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:52%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:47%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:63%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:58%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:74%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:70%"></div></div>
+            <div class="col"><div class="skel" style="width:20px;height:88%"></div></div>
+          </div>
+        </div>
+
+        <div id="progContent" class="hidden">
+          <div class="summary">
+            <div><div class="big" id="sBig">85 кг</div><div class="lbl">рабочий макс</div></div>
+            <div><div class="up" id="sUp"><svg class="ic" style="font-size:13px"><use href="#i-trend"/></svg> 12.5 кг</div><div class="lbl">за период</div></div>
+          </div>
+          <div class="chart" id="chart"></div>
+          <div class="xaxis"><span>21 июн</span><span>июль</span><span>23 июл</span></div>
+        </div>
+      </div>
+
+      <div class="sec-label">Личные рекорды</div>
+      <div class="pr3">
+        <div class="b"><div class="v" id="prW">85<small> кг</small></div><div class="k">макс вес</div></div>
+        <div class="b"><div class="v" id="pr1">99<small> кг</small></div><div class="k">расч. 1ПМ</div></div>
+        <div class="b"><div class="v" id="prR">12<small> раз</small></div><div class="k">макс повт.</div></div>
+      </div>
+    </section>
+
+    <!-- ============ ЖУРНАЛ ============ -->
+    <section id="journal" class="screen">
+      <div class="appbar">
+        <div><h1>Журнал</h1><div class="sub">История тренировок</div></div>
+        <button class="icon-btn"><svg class="ic"><use href="#i-calendar"/></svg></button>
+      </div>
+
+      <div class="weekstrip">
+        <div class="wd done"><div class="w">пн</div><div class="n">14</div><div class="dot"></div></div>
+        <div class="wd"><div class="w">вт</div><div class="n">15</div></div>
+        <div class="wd done"><div class="w">ср</div><div class="n">16</div><div class="dot"></div></div>
+        <div class="wd"><div class="w">чт</div><div class="n">17</div></div>
+        <div class="wd done"><div class="w">пт</div><div class="n">18</div><div class="dot"></div></div>
+        <div class="wd"><div class="w">сб</div><div class="n">19</div></div>
+        <div class="wd today"><div class="w">вс</div><div class="n">20</div></div>
+      </div>
+
+      <div class="sec-label">Эта неделя · 3 тренировки</div>
+      <div class="card">
+        <div class="log" onclick="openScreen('session','journal')">
+          <div class="dcol"><div class="dd">18</div><div class="dm">июл</div></div>
+          <div class="body"><div class="nm">Full Body · День A</div><div class="mt"><span><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> 52 мин</span><span>8 упр</span><span style="color:var(--green)"><svg class="ic" style="font-size:12px"><use href="#i-award"/></svg> PR</span></div></div>
+          <div class="vol"><div class="v">9.8 т</div><div class="k">объём</div></div>
+        </div>
+        <div class="log" onclick="openScreen('session','journal')">
+          <div class="dcol"><div class="dd">16</div><div class="dm">июл</div></div>
+          <div class="body"><div class="nm">Full Body · День C</div><div class="mt"><span><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> 47 мин</span><span>7 упр</span></div></div>
+          <div class="vol"><div class="v">8.1 т</div><div class="k">объём</div></div>
+        </div>
+        <div class="log" onclick="openScreen('session','journal')">
+          <div class="dcol"><div class="dd">14</div><div class="dm">июл</div></div>
+          <div class="body"><div class="nm">Full Body · День B</div><div class="mt"><span><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> 49 мин</span><span>4 упр</span><span style="color:var(--amber)"><svg class="ic" style="font-size:12px"><use href="#i-flame"/></svg> PR</span></div></div>
+          <div class="vol"><div class="v">10.2 т</div><div class="k">объём</div></div>
+        </div>
+      </div>
+
+      <div class="sec-label">Прошлая неделя · 3 тренировки</div>
+      <div class="card">
+        <div class="log" onclick="openScreen('session','journal')">
+          <div class="dcol"><div class="dd">11</div><div class="dm">июл</div></div>
+          <div class="body"><div class="nm">Full Body · День A</div><div class="mt"><span><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> 50 мин</span><span>8 упр</span></div></div>
+          <div class="vol"><div class="v">9.4 т</div><div class="k">объём</div></div>
+        </div>
+        <div class="log" onclick="openScreen('session','journal')">
+          <div class="dcol"><div class="dd">9</div><div class="dm">июл</div></div>
+          <div class="body"><div class="nm">Full Body · День C</div><div class="mt"><span><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> 44 мин</span><span>7 упр</span></div></div>
+          <div class="vol"><div class="v">7.9 т</div><div class="k">объём</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ РЕДАКТОР ПРОГРАММЫ ============ -->
+    <section id="editor" class="screen">
+      <div class="appbar push">
+        <button class="back" onclick="back()"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div><h1>Программа</h1></div>
+        <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="back()">Готово</button>
+      </div>
+      <div class="field"><label>Название</label><input value="Full Body"></div>
+      <div class="field"><label>Описание</label><input value="3 дня в неделю · база на всё тело"></div>
+
+      <div class="sec-label">Дни программы</div>
+      <div class="prog" style="margin-bottom:10px">
+        <div class="prog-head" onclick="toggleDays(this)"><div class="lbadge">A</div><div><div class="nm">День A · Присед-фокус</div><div class="mt">4 упражнения</div></div><span class="caret up"><svg class="ic"><use href="#i-chev-d"/></svg></span></div>
+        <div class="days" style="padding:10px">
+          <div class="plan"><div class="pn">Приседания со штангой<small>Ноги · Штанга</small></div><span class="setpill"><b>4</b> × <b>5</b></span><span class="rm"><svg class="ic"><use href="#i-x"/></svg></span></div>
+          <div class="plan"><div class="pn">Жим лёжа<small>Грудь · Штанга</small></div><span class="setpill"><b>4</b> × <b>5</b></span><span class="rm"><svg class="ic"><use href="#i-x"/></svg></span></div>
+          <div class="plan"><div class="pn">Тяга штанги в наклоне<small>Спина · Штанга</small></div><span class="setpill"><b>4</b> × <b>8</b></span><span class="rm"><svg class="ic"><use href="#i-x"/></svg></span></div>
+          <div class="plan"><div class="pn">Подъём на бицепс<small>Руки · Гантели</small></div><span class="setpill"><b>3</b> × <b>12</b></span><span class="rm"><svg class="ic"><use href="#i-x"/></svg></span></div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:2px" onclick="openScreen('catalog','editor')"><svg class="ic"><use href="#i-plus"/></svg> Добавить упражнение</button>
+        </div>
+      </div>
+
+      <div class="prog" style="margin-bottom:10px">
+        <div class="prog-head" onclick="toggleDays(this)"><div class="lbadge">B</div><div><div class="nm">День B · Тяга-фокус</div><div class="mt">4 упражнения</div></div><span class="caret"><svg class="ic"><use href="#i-chev-d"/></svg></span></div>
+        <div class="days" style="display:none;padding:10px">
+          <div class="plan"><div class="pn">Становая тяга<small>Спина · Штанга</small></div><span class="setpill"><b>3</b> × <b>5</b></span><span class="rm"><svg class="ic"><use href="#i-x"/></svg></span></div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" onclick="event.preventDefault()"><svg class="ic"><use href="#i-plus"/></svg> Добавить день</button>
+    </section>
+
+    <!-- ============ КАТАЛОГ ============ -->
+    <section id="catalog" class="screen">
+      <div class="appbar push">
+        <button class="back" onclick="back()"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div><h1>Упражнения</h1></div>
+        <button class="mini-edit" style="margin-left:auto" onclick="toggleAddEx()"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </div>
+      <div class="search-wrap"><svg class="ic"><use href="#i-search"/></svg><input class="search" placeholder="Поиск упражнения…"></div>
+      <div class="filters">
+        <div class="f on">Все</div><div class="f">Грудь</div><div class="f">Спина</div><div class="f">Ноги</div><div class="f">Плечи</div><div class="f">Руки</div><div class="f">Кор</div>
+      </div>
+
+      <div id="addExForm" class="card hidden" style="border-color:rgba(34,197,94,.4)">
+        <div class="field"><label>Название</label><input placeholder="напр. Жим гантелей лёжа"></div>
+        <div style="display:flex;gap:10px">
+          <div class="field" style="flex:1"><label>Группа мышц</label><select><option>Грудь</option><option>Спина</option><option>Ноги</option><option>Плечи</option><option>Руки</option><option>Кор</option></select></div>
+          <div class="field" style="flex:1"><label>Оборудование</label><select><option>Штанга</option><option>Гантели</option><option>Тренажёр</option><option>Свой вес</option><option>Блок</option></select></div>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAddEx()"><svg class="ic"><use href="#i-check"/></svg> Сохранить упражнение</button>
+      </div>
+
+      <div class="card">
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Приседания со штангой</div><div class="em">Ноги · Штанга</div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Жим лёжа</div><div class="em">Грудь · Штанга</div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Становая тяга</div><div class="em">Спина · Штанга</div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Жим стоя</div><div class="em">Плечи · Штанга</div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Подтягивания</div><div class="em">Спина · Свой вес</div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+        <div class="exrow"><div class="eic"><svg class="ic"><use href="#i-dumbbell"/></svg></div><div><div class="en">Тяга Т-грифа</div><div class="em">Спина · Тренажёр <span class="tag-mine">моё</span></div></div><div class="add"><svg class="ic"><use href="#i-plus"/></svg></div></div>
+      </div>
+    </section>
+
+    <!-- ============ ДЕТАЛИ ТРЕНИРОВКИ ============ -->
+    <section id="session" class="screen">
+      <div class="appbar push">
+        <button class="back" onclick="back()"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div><h1>18 июля</h1><div class="sub">Full Body · День A</div></div>
+        <button class="mini-edit" id="sessKebab" style="margin-left:auto" onclick="openSheet('session')"><svg class="ic"><use href="#i-dots"/></svg></button>
+        <button class="btn btn-primary btn-sm hidden" id="sessSaveBtn" style="margin-left:auto" onclick="sessionEdit(false)"><svg class="ic"><use href="#i-check"/></svg> Готово</button>
+      </div>
+      <div class="stat-row" style="margin-top:2px">
+        <div class="stat"><div class="v">52<small> мин</small></div><div class="k">время</div></div>
+        <div class="stat"><div class="v">9.8<small> т</small></div><div class="k">объём</div></div>
+        <div class="stat"><div class="v">27</div><div class="k">подходов</div></div>
+      </div>
+      <div class="card" style="margin-top:12px;display:flex;align-items:center;gap:11px;border-color:rgba(34,197,94,.35)">
+        <div class="pr-emoji"><svg class="ic"><use href="#i-award"/></svg></div><div><div style="font-weight:600;font-size:14px">Рекорд: Жим лёжа — 85 кг × 5</div><div style="color:var(--muted);font-size:12px">новый рабочий максимум</div></div>
+      </div>
+
+      <div class="sec-label">Приседания со штангой</div>
+      <div class="card" style="padding:4px 16px">
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">1</span><span class="val">100 кг × 5</span><span class="chip" style="padding:3px 9px">разминка</span></div>
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">2</span><span class="val">120 кг × 5</span><span style="color:var(--muted);font-size:12px">600 кг</span></div>
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">3</span><span class="val">120 кг × 5</span><span style="color:var(--muted);font-size:12px">600 кг</span></div>
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">4</span><span class="val">120 кг × 4</span><span style="color:var(--muted);font-size:12px">480 кг</span></div>
+      </div>
+
+      <div class="sec-label">Жим лёжа</div>
+      <div class="card" style="padding:4px 16px">
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">1</span><span class="val">60 кг × 5</span><span class="chip" style="padding:3px 9px">разминка</span></div>
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">2</span><span class="val">85 кг × 5</span><span class="chip" style="padding:3px 9px;background:var(--green-soft);border-color:rgba(34,197,94,.4);color:var(--green)"><svg class="ic" style="font-size:12px"><use href="#i-award"/></svg> PR</span></div>
+        <div class="setrow filled" style="grid-template-columns:34px 1fr auto"><span class="si">3</span><span class="val">85 кг × 4</span><span style="color:var(--muted);font-size:12px">340 кг</span></div>
+      </div>
+
+      <button class="btn btn-ghost" style="margin-top:14px"><svg class="ic"><use href="#i-repeat"/></svg> Повторить эту тренировку</button>
+    </section>
+
+    <!-- ============ НАСТРОЙКИ ============ -->
+    <section id="settings" class="screen">
+      <div class="appbar push">
+        <button class="back" onclick="back()"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div><h1>Настройки</h1></div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:center;gap:12px">
+        <div class="pr-emoji" style="width:44px;height:44px"><svg class="ic" style="font-size:22px"><use href="#i-user"/></svg></div>
+        <div><div style="font-weight:700">@you</div><div style="color:var(--muted);font-size:12px">Данные хранятся локально на устройстве</div></div>
+      </div>
+
+      <div class="sec-label">Тренировка</div>
+      <div class="card">
+        <div class="srow"><div><div class="sk">Единицы веса</div></div><div class="sr seg"><button class="on">кг</button><button>фунты</button></div></div>
+        <div class="srow"><div><div class="sk">Отдых по умолчанию</div><div class="sd">между подходами</div></div><div class="sr seg"><button>1:00</button><button>1:30</button><button class="on">2:00</button><button>3:00</button></div></div>
+        <div class="srow"><div><div class="sk">Звук и вибрация</div><div class="sd">по окончании таймера</div></div><div class="sr switch on" onclick="this.classList.toggle('on')"><i></i></div></div>
+      </div>
+
+      <div class="sec-label">Оформление</div>
+      <div class="card">
+        <div class="srow"><div><div class="sk">Тема</div><div class="sd">светлая — скоро</div></div><div class="sr seg"><button class="on">Тёмная</button><button>Светлая</button><button>Авто</button></div></div>
+      </div>
+
+      <div class="sec-label">Данные</div>
+      <div class="card">
+        <div class="srow"><div class="sk">Экспорт в JSON</div><div class="sr chev"><svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+        <div class="srow"><div class="sk">Импорт из файла</div><div class="sr chev"><svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+        <div class="srow"><div class="sk">Очистить демо-данные</div><div class="sr chev"><svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+        <div class="srow danger"><div class="sk">Сбросить всё</div><div class="sr chev" style="color:var(--red)"><svg class="ic"><use href="#i-chev-r"/></svg></div></div>
+      </div>
+      <p style="color:var(--dim);font-size:12px;text-align:center;margin-top:16px">Fitness Tracker · v0.1 · офлайн-first PWA</p>
+    </section>
+
+    <!-- ============ АКТИВНАЯ ТРЕНИРОВКА ============ -->
+    <section id="workout" class="screen">
+      <div class="wk-top">
+        <button class="x" onclick="closeWorkout()"><svg class="ic"><use href="#i-x"/></svg></button>
+        <div class="tt">День B · Тяга-фокус<div class="s">Full Body</div></div>
+        <div class="clock"><svg class="ic" style="font-size:12px"><use href="#i-clock"/></svg> <span id="wkClock">00:42</span></div>
+      </div>
+      <div class="wk-progress"><i id="wkBar" style="width:25%"></i></div>
+
+      <div class="exq cur">
+        <div class="exq-h">
+          <div class="num">1</div>
+          <div><div class="nm">Становая тяга</div><div class="tg">Цель: 3 × 5 · отдых 2:00</div></div>
+          <div class="st" id="exqCount">1 / 3</div>
+        </div>
+        <div id="setList">
+          <div class="setrow filled"><span class="si">1</span><span class="prev">пред. 100×5</span><span class="val">100 кг × 5</span><span class="check"><svg class="ic"><use href="#i-check"/></svg></span></div>
+        </div>
+        <div class="logger">
+          <div class="stepper">
+            <div class="grp"><div class="lab">Вес</div>
+              <div class="ctl"><button onclick="step('w',-2.5)"><svg class="ic"><use href="#i-minus"/></svg></button><div class="n"><input id="w" class="nin" inputmode="decimal" value="102.5" oninput="onInput('w',this)" onfocus="this.select()"> <small>кг</small></div><button onclick="step('w',2.5)"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+            </div>
+            <div class="grp"><div class="lab">Повторы</div>
+              <div class="ctl"><button onclick="step('r',-1)"><svg class="ic"><use href="#i-minus"/></svg></button><div class="n"><input id="r" class="nin" inputmode="numeric" value="5" oninput="onInput('r',this)" onfocus="this.select()"></div><button onclick="step('r',1)"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="logSet()"><svg class="ic"><use href="#i-check"/></svg> Записать подход</button>
+        </div>
+      </div>
+
+      <div class="exq"><div class="exq-h"><div class="num">2</div><div><div class="nm">Жим стоя</div><div class="tg">Цель: 4 × 6</div></div><div class="st">0 / 4</div></div></div>
+      <div class="exq"><div class="exq-h"><div class="num">3</div><div><div class="nm">Подтягивания</div><div class="tg">Цель: 4 × 8</div></div><div class="st">0 / 4</div></div></div>
+      <div class="exq"><div class="exq-h"><div class="num">4</div><div><div class="nm">Гиперэкстензия</div><div class="tg">Цель: 3 × 15</div></div><div class="st">0 / 3</div></div></div>
+
+      <button class="btn btn-ghost" style="margin-top:8px" onclick="closeWorkout()">Завершить тренировку</button>
+    </section>
+
+  </div>
+
+  <!-- Нижний лист действий (журнал / детали сессии) -->
+  <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-grab"></div>
+    <button class="sheet-item" onclick="sheetEdit()"><svg class="ic"><use href="#i-pencil"/></svg> Редактировать</button>
+    <button class="sheet-item danger" onclick="sheetDelete()"><svg class="ic"><use href="#i-trash"/></svg> Удалить тренировку</button>
+  </div>
+
+  <!-- Диалог подтверждения удаления -->
+  <div class="scrim" id="dlgScrim" onclick="closeConfirm()"></div>
+  <div class="dlg" id="dlg">
+    <div class="t" id="dlgT">Удалить тренировку?</div>
+    <div class="d" id="dlgD">Запись и все подходы будут удалены безвозвратно.</div>
+    <div class="dlg-acts">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Отмена</button>
+      <button class="btn btn-danger" id="dlgOk">Удалить</button>
+    </div>
+  </div>
+
+  <div class="pr-burst" id="prBurst">
+    <div class="pr-card" id="prCard">
+      <div class="medal"><svg class="ic"><use href="#i-award"/></svg></div>
+      <div class="lead">Новый рекорд</div>
+      <div class="exn" id="prExn">Становая тяга</div>
+      <div class="big" id="prBig">102.5 кг × 5</div>
+      <div class="sub" id="prSub">+2.5 кг к прошлому максимуму</div>
+    </div>
+  </div>
+
+  <div class="restbar" id="restbar">
+    <div class="ring" id="restRing">1:30</div>
+    <div class="lab">Отдых перед подходом<b id="restNext">Становая тяга · подход 3</b></div>
+    <div class="acts">
+      <button onclick="restAdd(15)">+15с</button>
+      <button class="skip" onclick="restSkip()">Пропустить</button>
+    </div>
+  </div>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab on" data-s="home" onclick="go(this)"><svg class="ic"><use href="#i-home"/></svg>Сегодня</button>
+    <button class="tab" data-s="programs" onclick="go(this)"><svg class="ic"><use href="#i-folder"/></svg>Программы</button>
+    <button class="tab" data-s="progress" onclick="go(this)"><svg class="ic"><use href="#i-trend"/></svg>Прогресс</button>
+    <button class="tab" data-s="journal" onclick="go(this)"><svg class="ic"><use href="#i-book"/></svg>Журнал</button>
+  </nav>
+</div>
+
+<p class="caption">Интерактивный макет · нижняя навигация, «Начать тренировку», запись подхода, таймер отдыха. Данные — демо (mockup).</p>
+
+<script>
+  function show(id){
+    if(id!=='session'){ const se=document.getElementById('session'); if(se&&se.classList.contains('editing')) sessionEdit(false,true); }
+    document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+    document.querySelector('.screens').scrollTop=0;
+    if(id==='progress') maybeLoadProgress();
+    if(id==='session') resetSessionBar();
+  }
+  function go(btn){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('tabbar').classList.remove('hidden');
+    show(btn.dataset.s);
+  }
+  let backTo='programs';
+  function openScreen(id,origin){ if(origin) backTo=origin; document.getElementById('tabbar').classList.remove('hidden'); show(id); }
+  function back(){ show(backTo); }
+  function toggleAddEx(){ document.getElementById('addExForm').classList.toggle('hidden'); }
+  function startWorkout(){ document.getElementById('tabbar').classList.add('hidden'); show('workout'); }
+  function closeWorkout(){
+    restSkip();
+    document.getElementById('tabbar').classList.remove('hidden');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.s==='home'));
+    show('home');
+  }
+  function toggleDays(head){
+    const d=head.nextElementSibling;
+    d.style.display = d.style.display==='none' ? 'block' : 'none';
+    const c=head.querySelector('.caret'); if(c) c.classList.toggle('up');
+  }
+
+  // ---- запись подхода ----
+  let vals={w:102.5,r:5}, doneSets=1, targetSets=3;
+  let bestWeight=100;               // прошлый рабочий максимум в этом упражнении
+  function step(k,d){ vals[k]=Math.max(0, +(vals[k]+d).toFixed(1)); document.getElementById(k).value=vals[k]; }
+  function onInput(k,el){ let v=parseFloat(el.value.replace(',','.')); if(isNaN(v))v=0; if(k==='r')v=Math.round(v); vals[k]=Math.max(0,v); }
+  function logSet(){
+    if(!(vals.w>0)||!(vals.r>0)) return;   // пустой ввод — не записываем
+    doneSets++;
+    const isPr = vals.w > bestWeight && vals.r >= 1;
+    const row=document.createElement('div');
+    row.className='setrow filled'+(isPr?' pr-hit':'');
+    const mark = isPr
+      ? '<span class="prbadge"><svg class="ic"><use href="#i-award"/></svg> PR</span>'
+      : '<span class="check"><svg class="ic"><use href="#i-check"/></svg></span>';
+    row.innerHTML='<span class="si">'+doneSets+'</span><span class="prev">только что</span><span class="val">'+vals.w+' кг × '+vals.r+'</span>'+mark;
+    document.getElementById('setList').appendChild(row);
+    document.getElementById('exqCount').textContent=Math.min(doneSets,targetSets)+' / '+targetSets;
+    document.getElementById('wkBar').style.width=Math.min(doneSets/targetSets*33+8,40)+'%';
+
+    const advanceRest = ()=>{
+      if(doneSets<targetSets){ document.getElementById('restNext').textContent='Становая тяга · подход '+(doneSets+1); restStart(90); }
+      else { document.getElementById('restNext').textContent='Переходи к: Жим стоя'; restStart(120); }
+    };
+
+    if(isPr){
+      const delta=+(vals.w-bestWeight).toFixed(1);
+      bestWeight=vals.w;              // рекорд поднялся — новая планка
+      celebratePR(vals.w, vals.r, delta);
+      setTimeout(advanceRest, 900);  // даём празднику момент, потом таймер отдыха
+    } else {
+      advanceRest();
+    }
+  }
+
+  // ---- PR-момент: конфетти + медаль + вибрация ----
+  const PR_COLORS=['#22C55E','#A78BFA','#F59E0B','#4ade80','#c4b5fd'];
+  function celebratePR(w,r,delta){
+    document.getElementById('prExn').textContent='Становая тяга';
+    document.getElementById('prBig').textContent=w+' кг × '+r;
+    document.getElementById('prSub').textContent = delta>0 ? ('+'+delta+' кг к прошлому максимуму') : 'новый максимум';
+    const burst=document.getElementById('prBurst'), card=document.getElementById('prCard');
+    burst.classList.add('show');
+    for(let i=0;i<72;i++){
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.style.left=(Math.random()*100)+'%';
+      c.style.background=PR_COLORS[i%PR_COLORS.length];
+      c.style.animationDuration=(1.1+Math.random()*1.1)+'s';
+      c.style.animationDelay=(Math.random()*0.28)+'s';
+      if(Math.random()<0.5) c.style.borderRadius='50%';
+      if(Math.random()<0.4) c.style.width='6px', c.style.height='10px';
+      burst.appendChild(c);
+      setTimeout(()=>c.remove(),2700);
+    }
+    card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+    if(navigator.vibrate) navigator.vibrate([0,45,55,45,55,140]);
+    setTimeout(()=>burst.classList.remove('show'),2050);
+  }
+
+  // ---- таймер отдыха ----
+  let restT=null, restLeft=0;
+  function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+  function restStart(sec){
+    restLeft=sec;
+    document.getElementById('restRing').textContent=fmt(restLeft);
+    document.getElementById('restbar').classList.add('show');
+    clearInterval(restT);
+    restT=setInterval(()=>{ restLeft--; document.getElementById('restRing').textContent=fmt(Math.max(restLeft,0)); if(restLeft<=0) restSkip(); },1000);
+  }
+  function restAdd(s){ restLeft+=s; document.getElementById('restRing').textContent=fmt(restLeft); }
+  function restSkip(){ clearInterval(restT); document.getElementById('restbar').classList.remove('show'); }
+
+  // ---- графики ----
+  const DATA={
+    bench:{title:'Жим лёжа', big:'85 кг', up:'12.5 кг', pr:['85','99','12'], v:[70,72.5,72.5,75,75,77.5,80,80,82.5,85]},
+    squat:{title:'Приседания', big:'120 кг', up:'15 кг', pr:['120','140','8'], v:[100,105,105,110,110,115,115,120,120,120]},
+    dead:{title:'Становая', big:'150 кг', up:'20 кг', pr:['150','169','5'], v:[120,125,130,130,135,140,140,145,150,150]},
+    ohp:{title:'Жим стоя', big:'55 кг', up:'7.5 кг', pr:['55','62','8'], v:[45,47.5,47.5,50,50,50,52.5,52.5,55,55]}
+  };
+  let curEx='bench';
+  function drawChart(key){
+    curEx=key;
+    const d=DATA[key], c=document.getElementById('chart');
+    const max=Math.max(...d.v), min=Math.min(...d.v)*0.9;
+    c.innerHTML=d.v.map((val,i)=>{
+      const h=Math.round((val-min)/(max-min)*100);
+      const last=i===d.v.length-1?' last':'';
+      const show=(i%2===0||i===d.v.length-1)?('<span class="bv">'+val+'</span>'):'';
+      return '<div class="col'+last+'">'+show+'<div class="bar" style="height:'+Math.max(h,6)+'%"></div></div>';
+    }).join('');
+    document.getElementById('chTitle').textContent=d.title;
+    document.getElementById('sBig').textContent=d.big;
+    document.getElementById('sUp').innerHTML='<svg class="ic" style="font-size:13px"><use href="#i-trend"/></svg> '+d.up;
+    document.getElementById('prW').innerHTML=d.pr[0]+'<small> кг</small>';
+    document.getElementById('pr1').innerHTML=d.pr[1]+'<small> кг</small>';
+    document.getElementById('prR').innerHTML=d.pr[2]+'<small> раз</small>';
+  }
+  function pickEx(el,key){
+    document.querySelectorAll('#exPills .p').forEach(p=>p.classList.remove('on'));
+    el.classList.add('on'); drawChart(key);
+  }
+  function setRange(el){
+    el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  // ---- скелетон загрузки (первый вход на «Прогресс») ----
+  let progLoaded=false;
+  function maybeLoadProgress(){
+    if(progLoaded) return;
+    document.getElementById('progSkel').classList.remove('hidden');
+    document.getElementById('progContent').classList.add('hidden');
+    setTimeout(()=>{
+      document.getElementById('progSkel').classList.add('hidden');
+      document.getElementById('progContent').classList.remove('hidden');
+      drawChart(curEx);
+      progLoaded=true;
+    },750);
+  }
+  drawChart('bench');
+
+  // мини-часы активной тренировки
+  let wk=42; setInterval(()=>{ if(document.getElementById('workout').classList.contains('active')){ wk++; document.getElementById('wkClock').textContent='00:'+String(wk%60).padStart(2,'0'); } },1000);
+
+  // ===== Редактирование / удаление журнала =====
+  let sheetCtx=null;   // 'session' | элемент .log
+  function openSheet(ctx){
+    sheetCtx=ctx;
+    document.getElementById('scrim').classList.add('show');
+    document.getElementById('sheet').classList.add('show');
+  }
+  function closeSheet(){
+    document.getElementById('scrim').classList.remove('show');
+    document.getElementById('sheet').classList.remove('show');
+  }
+  function sheetEdit(){
+    closeSheet();
+    if(sheetCtx==='session'){ sessionEdit(true); }
+    else { openScreen('session','journal'); setTimeout(()=>sessionEdit(true),60); }
+  }
+  function sheetDelete(){
+    const ctx=sheetCtx; closeSheet();
+    openConfirm('Удалить тренировку?','Запись и все подходы будут удалены безвозвратно.',()=>{
+      if(ctx==='session'){ back(); }          // в макете — просто возврат
+      else if(ctx && ctx.remove){
+        ctx.classList.add('removing');
+        setTimeout(()=>{ ctx.remove(); updateWeekCounts(); },200);
+      }
+    });
+  }
+
+  // ---- диалог подтверждения ----
+  let confirmCb=null;
+  function openConfirm(t,d,cb){
+    confirmCb=cb;
+    document.getElementById('dlgT').textContent=t;
+    document.getElementById('dlgD').textContent=d;
+    document.getElementById('dlgScrim').classList.add('show');
+    document.getElementById('dlg').classList.add('show');
+  }
+  function closeConfirm(){
+    document.getElementById('dlgScrim').classList.remove('show');
+    document.getElementById('dlg').classList.remove('show');
+    confirmCb=null;
+  }
+  document.getElementById('dlgOk').onclick=()=>{ const cb=confirmCb; closeConfirm(); if(cb) cb(); };
+
+  // ---- пересчёт «· N тренировок» в заголовках недель ----
+  function plural(n,f){ const a=n%10,b=n%100; return (b>=11&&b<=14)?f[2]:a===1?f[0]:(a>=2&&a<=4)?f[1]:f[2]; }
+  function updateWeekCounts(){
+    document.querySelectorAll('#journal .sec-label').forEach(lbl=>{
+      const card=lbl.nextElementSibling;
+      if(!card||!card.classList.contains('card')) return;
+      const n=card.querySelectorAll('.log').length;
+      lbl.textContent=lbl.textContent.replace(/·\s*\d+\s*тренировк\S*/, '· '+n+' '+plural(n,['тренировка','тренировки','тренировок']));
+    });
+  }
+
+  // ---- режим редактирования деталей сессии ----
+  function resetSessionBar(){
+    document.getElementById('sessKebab').classList.remove('hidden');
+    document.getElementById('sessSaveBtn').classList.add('hidden');
+  }
+  function sessionEdit(on,discard){
+    const s=document.getElementById('session');
+    s.classList.toggle('editing',on);
+    document.getElementById('sessKebab').classList.toggle('hidden',on);
+    document.getElementById('sessSaveBtn').classList.toggle('hidden',!on);
+    s.querySelectorAll('.setrow').forEach(row=>{
+      const val=row.querySelector('.val'); if(!val && !row.classList.contains('erow')) return;
+      if(on){
+        if(row.classList.contains('erow')) return;
+        const m=(val?val.textContent:'').match(/([\d.]+)\s*кг\s*×\s*(\d+)/);
+        const w=m?m[1]:'0', r=m?m[2]:'0';
+        row.dataset.raw=row.innerHTML;
+        row.dataset.si=(row.querySelector('.si')?row.querySelector('.si').textContent:'');
+        row.classList.add('erow');
+        row.innerHTML='<span class="si">'+row.dataset.si+'</span>'
+          +'<div class="einwrap"><input class="ein ew" inputmode="decimal" value="'+w+'" onfocus="this.select()"><span>кг ×</span><input class="ein er" inputmode="numeric" value="'+r+'" onfocus="this.select()"></div>'
+          +'<button class="del-set" title="Удалить подход"><svg class="ic"><use href="#i-x"/></svg></button>';
+        row.querySelector('.del-set').onclick=()=>{ row.classList.add('removing'); setTimeout(()=>row.remove(),200); };
+      } else {
+        if(!row.classList.contains('erow')) return;
+        const ew=row.querySelector('.ew'), er=row.querySelector('.er');
+        const nw=ew?ew.value:'', nr=er?er.value:'';
+        row.innerHTML=row.dataset.raw;             // восстанавливаем исходную вёрстку
+        if(!discard){ const v=row.querySelector('.val'); if(v) v.textContent=nw+' кг × '+nr; }
+        row.classList.remove('erow'); delete row.dataset.raw; delete row.dataset.si;
+      }
+    });
+    if(!on && !discard){                            // перенумеровать подходы после удалений
+      s.querySelectorAll('.card').forEach(card=>{
+        let i=0; card.querySelectorAll('.setrow .si').forEach(si=>{ i++; si.textContent=i; });
+      });
+    }
+  }
+
+  // ---- навешиваем «⋯» на каждую запись журнала ----
+  document.querySelectorAll('#journal .log').forEach(log=>{
+    const b=document.createElement('button');
+    b.className='row-kebab';
+    b.innerHTML='<svg class="ic"><use href="#i-dots"/></svg>';
+    b.onclick=e=>{ e.stopPropagation(); openSheet(log); };
+    log.appendChild(b);
+  });
+</script>
+</body>
+</html>
