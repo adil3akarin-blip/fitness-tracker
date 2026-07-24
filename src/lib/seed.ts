@@ -129,6 +129,6 @@ export function seedData(): AppData {
     exercises: EXERCISES,
     programs: [fullBody, upperLower],
     sessions: generateSessions(),
-    settings: { units: 'kg', defaultRestSec: 120, soundOn: true, theme: 'dark' },
+    settings: { units: 'kg', soundOn: true, theme: 'dark' },
   }
 }

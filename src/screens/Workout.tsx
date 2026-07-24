@@ -4,13 +4,15 @@ import { useStore } from '../lib/store'
 import { Icon } from '../icons'
 import { clearActiveWorkout, loadActiveWorkout, saveActiveWorkout } from '../lib/storage'
 import { clockMS, mmss, nowISO, uid } from '../lib/util'
+import { fmtWeight, fromDisplayWeight, toDisplayWeight, weightLabel, weightStepDisplay } from '../lib/units'
+import { chime, primeAudio } from '../lib/sound'
 import WeightVisual from '../components/WeightVisual'
-import { whip } from '../lib/whip'
+import { Collapse } from '../components/Collapse'
+import { pop, whip } from '../lib/whip'
 import type { Equipment, LoggedSet, WorkoutSession } from '../types'
 
 const defaultWeight = (eq: Equipment) =>
   eq === 'Штанга' ? 20 : eq === 'Тренажёр' ? 20 : eq === 'Блок' ? 15 : eq === 'Гантели' ? 10 : 0
-const weightStep = (eq: Equipment) => (eq === 'Штанга' || eq === 'Тренажёр' ? 2.5 : eq === 'Свой вес' ? 1 : 2)
 const parseNum = (v: string, fallback: number) => {
   const n = parseFloat(v.replace(',', '.'))
   return isNaN(n) ? fallback : n
@@ -20,6 +22,7 @@ export default function Workout() {
   const { programId, dayId } = useParams()
   const nav = useNavigate()
   const { data, exerciseById, addSession } = useStore()
+  const units = data.settings.units
 
   const program = data.programs.find((p) => p.id === programId)
   const day = program?.days.find((d) => d.id === dayId)
@@ -42,11 +45,17 @@ export default function Workout() {
   const [reps, setReps] = useState(5)
 
   const [restLeft, setRestLeft] = useState(0)
+  const [restTotal, setRestTotal] = useState(0)
   const [restActive, setRestActive] = useState(false)
   const [restLabel, setRestLabel] = useState('')
+  // эфемерные бейджи «PR» на строках подходов (не персистятся — празднование момента)
+  const [prIds, setPrIds] = useState<Set<string>>(new Set())
 
   // карточка текущего упражнения — сюда прилетает фирменный «кланк» при записи подхода
   const curRef = useRef<HTMLDivElement>(null)
+  // цифры степперов — микро-поп при нажатии кнопок ±
+  const wNumRef = useRef<HTMLDivElement>(null)
+  const rNumRef = useRef<HTMLDivElement>(null)
 
   // часы тренировки
   useEffect(() => {
@@ -57,9 +66,12 @@ export default function Workout() {
   // таймер отдыха
   useEffect(() => {
     if (!restActive) return
-    const t = setInterval(() => setRestLeft((x) => (x <= 1 ? (setRestActive(false), 0) : x - 1)), 1000)
+    const t = setInterval(() => setRestLeft((x) => {
+      if (x <= 1) { setRestActive(false); if (data.settings.soundOn) chime(); return 0 }
+      return x - 1
+    }), 1000)
     return () => clearInterval(t)
-  }, [restActive])
+  }, [restActive, data.settings.soundOn])
 
   // персист живой тренировки: пишем при каждом изменении, чистим если ничего не записано
   useEffect(() => {
@@ -115,6 +127,7 @@ export default function Workout() {
 
   const startRest = (sec: number, label: string) => {
     setRestLeft(sec)
+    setRestTotal(sec)
     setRestLabel(label)
     setRestActive(true)
   }
@@ -122,6 +135,7 @@ export default function Workout() {
   const logSet = () => {
     const item = items.find((i) => i.id === currentId)
     if (!item) return
+    if (data.settings.soundOn) primeAudio() // разблокировать AudioContext на жесте (iOS)
     const cur = logged[currentId!] ?? []
     const set: LoggedSet = { id: uid(), exerciseId: item.exerciseId, setNumber: cur.length + 1, weight, reps, warmup: false, completedAt: nowISO() }
     const next = { ...logged, [currentId!]: [...cur, set] }
@@ -132,6 +146,7 @@ export default function Workout() {
     const repsBased = ex?.equipment === 'Свой вес'
     const pr = h ? (repsBased ? reps > h.reps : weight > h.weight) : false
     whip(curRef.current, { weight, reps, repsBased, pr })
+    if (pr) setPrIds((p) => new Set(p).add(set.id))
 
     setLogged(next)
 
@@ -169,7 +184,7 @@ export default function Workout() {
     }
     addSession(session)
     clearActiveWorkout()
-    nav(`/session/${session.id}`, { replace: true })
+    nav(`/session/${session.id}`, { replace: true, state: { celebrate: true } })
   }
 
   // «Свернуть»: прогресс сохранён — просто выходим, продолжить можно с главной
@@ -190,7 +205,7 @@ export default function Workout() {
           <div className="tt">День {day.letter} · {day.name}<div className="s">{program.name}</div></div>
           <div className="clock"><Icon name="clock" style={{ fontSize: 12 }} /> {clockMS(elapsed)}</div>
         </div>
-        <div className="wk-progress"><i style={{ width: `${Math.round((totalDone / totalPlanned) * 100)}%` }} /></div>
+        <div className={'wk-progress' + (totalPlanned > 0 && totalDone >= totalPlanned ? ' full' : '')}><i style={{ width: `${Math.round((totalDone / totalPlanned) * 100)}%` }} /></div>
 
         {items.map((item, idx) => {
           const sets = logged[item.id] ?? []
@@ -199,68 +214,68 @@ export default function Workout() {
           const ex = exerciseById(item.exerciseId)
           const prev = historyTop(item.exerciseId)
 
-          if (!isCurrent) {
-            return (
-              <div className={'exq' + (isDone ? ' done' : '')} key={item.id}>
-                <div className="exq-h" onClick={() => setCurrentId(item.id)}>
-                  <div className="num">{isDone ? <Icon name="check" style={{ fontSize: 14 }} /> : idx + 1}</div>
-                  <div><div className="nm">{ex?.name}</div><div className="tg">{isDone ? 'Готово · нажми, чтобы изменить' : `Цель: ${item.targetSets} × ${item.repsMin}`}</div></div>
-                  <div className="st">{sets.length} / {item.targetSets}</div>
-                </div>
-              </div>
-            )
-          }
-
-          const st = weightStep(ex?.equipment ?? 'Штанга')
+          const stepD = weightStepDisplay(ex?.equipment ?? 'Штанга', units)
           return (
-            <div className="exq cur" key={item.id} ref={curRef}>
-              <div className="exq-h">
-                <div className="num">{idx + 1}</div>
+            <div
+              className={'exq' + (isCurrent ? ' cur' : '') + (!isCurrent && isDone ? ' done' : '')}
+              key={item.id}
+              ref={isCurrent ? curRef : undefined}
+            >
+              <div className="exq-h" onClick={() => { if (!isCurrent) setCurrentId(item.id) }}>
+                <div className="num">{!isCurrent && isDone ? <Icon name="check" style={{ fontSize: 14 }} /> : idx + 1}</div>
                 <div>
                   <div className="nm">{ex?.name}</div>
-                  <div className="tg">Цель: {item.targetSets} × {item.repsMin} · отдых {mmss(item.restSec)}{prev ? ` · пред. ${prev.weight}×${prev.reps}` : ''}</div>
+                  <div className="tg">
+                    {isCurrent
+                      ? <>Цель: {item.targetSets} × {item.repsMin} · отдых {mmss(item.restSec)}{prev ? ` · пред. ${prev.weight}×${prev.reps}` : ''}</>
+                      : (isDone ? 'Готово · нажми, чтобы изменить' : `Цель: ${item.targetSets} × ${item.repsMin}`)}
+                  </div>
                 </div>
                 <div className="st">{sets.length} / {item.targetSets}</div>
               </div>
-              {sets.map((s, i) => (
-                <div className="setrow filled" key={s.id}>
-                  <span className="si">{i + 1}</span>
-                  <span className="prev"><Icon name="check" style={{ color: 'var(--green)' }} /></span>
-                  <span className="val">{s.weight > 0 ? `${s.weight} кг × ${s.reps}` : `${s.reps} повт.`}</span>
-                  <button className="setdel" onClick={() => removeSet(item.id, s.id)} aria-label="Удалить подход"><Icon name="x" /></button>
-                </div>
-              ))}
-              <div className="logger">
-                <WeightVisual equipment={ex?.equipment} weight={weight} reps={reps} />
-                <div className="stepper">
-                  <div className="grp">
-                    <div className="lab">Вес</div>
-                    <div className="ctl">
-                      <button onClick={() => setWeight((w) => Math.max(0, +(w - st).toFixed(1)))}><Icon name="minus" /></button>
-                      <div className="n">
-                        <input className="ninp" type="text" inputMode="decimal" value={weight}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => setWeight(Math.max(0, parseNum(e.target.value, 0)))} />
-                        <small>кг</small>
-                      </div>
-                      <button onClick={() => setWeight((w) => +(w + st).toFixed(1))}><Icon name="plus" /></button>
+              <Collapse open={isCurrent}>
+                <div>
+                  {sets.map((s, i) => (
+                    <div className="setrow filled" key={s.id}>
+                      <span className="si">{i + 1}</span>
+                      <span className="prev"><Icon name="check" style={{ color: 'var(--green)' }} /></span>
+                      <span className="val">{s.weight > 0 ? `${fmtWeight(s.weight, units)} × ${s.reps}` : `${s.reps} повт.`}{prIds.has(s.id) && <b className="pr-badge">PR</b>}</span>
+                      <button className="setdel" onClick={() => removeSet(item.id, s.id)} aria-label="Удалить подход"><Icon name="x" /></button>
                     </div>
-                  </div>
-                  <div className="grp">
-                    <div className="lab">Повторы</div>
-                    <div className="ctl">
-                      <button onClick={() => setReps((r) => Math.max(1, r - 1))}><Icon name="minus" /></button>
-                      <div className="n">
-                        <input className="ninp" type="text" inputMode="numeric" value={reps}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => setReps(Math.max(1, Math.round(parseNum(e.target.value, 1))))} />
+                  ))}
+                  <div className="logger">
+                    <WeightVisual equipment={ex?.equipment} weight={weight} reps={reps} units={units} />
+                    <div className="stepper">
+                      <div className="grp">
+                        <div className="lab">Вес</div>
+                        <div className="ctl">
+                          <button onClick={() => { setWeight((w) => Math.max(0, fromDisplayWeight(Math.max(0, toDisplayWeight(w, units) - stepD), units))); pop(wNumRef.current) }}><Icon name="minus" /></button>
+                          <div className="n" ref={wNumRef}>
+                            <input className="ninp" type="text" inputMode="decimal" value={toDisplayWeight(weight, units)}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => setWeight(Math.max(0, fromDisplayWeight(parseNum(e.target.value, 0), units)))} />
+                            <small>{weightLabel(units)}</small>
+                          </div>
+                          <button onClick={() => { setWeight((w) => fromDisplayWeight(toDisplayWeight(w, units) + stepD, units)); pop(wNumRef.current) }}><Icon name="plus" /></button>
+                        </div>
                       </div>
-                      <button onClick={() => setReps((r) => r + 1)}><Icon name="plus" /></button>
+                      <div className="grp">
+                        <div className="lab">Повторы</div>
+                        <div className="ctl">
+                          <button onClick={() => { setReps((r) => Math.max(1, r - 1)); pop(rNumRef.current) }}><Icon name="minus" /></button>
+                          <div className="n" ref={rNumRef}>
+                            <input className="ninp" type="text" inputMode="numeric" value={reps}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => setReps(Math.max(1, Math.round(parseNum(e.target.value, 1))))} />
+                          </div>
+                          <button onClick={() => { setReps((r) => r + 1); pop(rNumRef.current) }}><Icon name="plus" /></button>
+                        </div>
+                      </div>
                     </div>
+                    <button className="btn btn-primary" onClick={logSet}><Icon name="check" /> Записать подход</button>
                   </div>
                 </div>
-                <button className="btn btn-primary" onClick={logSet}><Icon name="check" /> Записать подход</button>
-              </div>
+              </Collapse>
             </div>
           )
         })}
@@ -270,10 +285,16 @@ export default function Workout() {
       </div>
 
       <div className={'restbar' + (restActive ? ' show' : '')}>
-        <div className="ring">{mmss(restLeft)}</div>
+        <div className={'ring' + (restActive && restLeft <= 5 ? ' hot' : '')}>
+          <svg viewBox="0 0 56 56">
+            <circle className="tr" cx="28" cy="28" r="24" />
+            <circle className="fg" cx="28" cy="28" r="24" style={{ strokeDashoffset: 150.8 * (1 - (restTotal > 0 ? restLeft / restTotal : 0)) }} />
+          </svg>
+          <div className="num">{mmss(restLeft)}</div>
+        </div>
         <div className="lab">Отдых перед подходом<b>{restLabel}</b></div>
         <div className="acts">
-          <button onClick={() => setRestLeft((x) => x + 15)}>+15с</button>
+          <button onClick={() => { const nx = restLeft + 15; setRestLeft(nx); setRestTotal((t) => Math.max(t, nx)) }}>+15с</button>
           <button className="skip" onClick={() => setRestActive(false)}>Пропустить</button>
         </div>
       </div>

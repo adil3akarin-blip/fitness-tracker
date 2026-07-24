@@ -3,7 +3,8 @@ import { useStore } from '../lib/store'
 import { Icon, type IconName } from '../icons'
 import { exercisePR, sessionVolume, weightedExerciseIds } from '../lib/calc'
 import { loadActiveWorkout } from '../lib/storage'
-import { plural, startOfWeek, toTons } from '../lib/util'
+import { plural, startOfWeek } from '../lib/util'
+import { fmtVolume, fmtWeight } from '../lib/units'
 
 function streakWeeks(times: number[]): number {
   if (!times.length) return 0
@@ -28,6 +29,7 @@ export default function Home() {
   const { data, exerciseById } = useStore()
   const nav = useNavigate()
   const { sessions } = data
+  const units = data.settings.units
 
   const program = data.programs.find((p) => !p.isDraft) ?? data.programs[0]
 
@@ -126,8 +128,8 @@ export default function Home() {
 
       <div className="stat-row">
         <div className="stat"><div className="v">{thisWeek.length}</div><div className="k">за неделю</div></div>
-        <div className="stat"><div className="v">{streak} <small>нед</small></div><div className="k">серия</div></div>
-        <div className="stat"><div className="v">{toTons(volKg)}<small> т</small></div><div className="k">объём/нед</div></div>
+        <div className="stat"><div className="v">{streak} <small>нед</small>{streak > 0 && <Icon name="flame" className="streak-flame" />}</div><div className="k">серия</div></div>
+        <div className="stat"><div className="v">{fmtVolume(volKg, units).value}<small> {fmtVolume(volKg, units).unit}</small></div><div className="k">объём/нед</div></div>
       </div>
 
       {prs.length > 0 && (
@@ -144,9 +146,9 @@ export default function Home() {
                   </div>
                   <div>
                     <div className="n">{ex?.name}</div>
-                    <div className="d">1ПМ ≈ {x.pr.best1RM} кг · макс {x.pr.maxReps} повт.</div>
+                    <div className="d">1ПМ ≈ {fmtWeight(x.pr.best1RM, units)} · макс {x.pr.maxReps} повт.</div>
                   </div>
-                  <div className="val">{x.pr.maxWeight} кг</div>
+                  <div className="val">{fmtWeight(x.pr.maxWeight, units)}</div>
                 </div>
               )
             })}

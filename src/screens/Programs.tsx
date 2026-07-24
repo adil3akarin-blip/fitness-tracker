@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
 import { plural } from '../lib/util'
+import { Collapse } from '../components/Collapse'
 import type { Program } from '../types'
 
 export default function Programs() {
@@ -48,7 +49,7 @@ export default function Programs() {
             </div>
             <span className={'caret' + (open[p.id] ? ' up' : '')}><Icon name="chev-d" /></span>
           </div>
-          {open[p.id] && (
+          <Collapse open={!!open[p.id]}>
             <div className="days">
               {p.days.map((d, di) => {
                 const empty = d.items.length === 0
@@ -67,7 +68,7 @@ export default function Programs() {
                 <Icon name="pencil" /> Изменить программу
               </button>
             </div>
-          )}
+          </Collapse>
         </div>
       ))}
 

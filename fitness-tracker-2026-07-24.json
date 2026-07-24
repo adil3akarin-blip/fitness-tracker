@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "userId": "local",
+  "exercises": [
+    {
+      "id": "ex-squat",
+      "ownerId": null,
+      "name": "Приседания со штангой",
+      "muscleGroup": "Ноги",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-bench",
+      "ownerId": null,
+      "name": "Жим лёжа",
+      "muscleGroup": "Грудь",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-row",
+      "ownerId": null,
+      "name": "Тяга штанги в наклоне",
+      "muscleGroup": "Спина",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-curl",
+      "ownerId": null,
+      "name": "Подъём на бицепс",
+      "muscleGroup": "Руки",
+      "equipment": "Гантели",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-dead",
+      "ownerId": null,
+      "name": "Становая тяга",
+      "muscleGroup": "Спина",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-ohp",
+      "ownerId": null,
+      "name": "Жим стоя",
+      "muscleGroup": "Плечи",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-pullup",
+      "ownerId": null,
+      "name": "Подтягивания",
+      "muscleGroup": "Спина",
+      "equipment": "Свой вес",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-hyper",
+      "ownerId": null,
+      "name": "Гиперэкстензия",
+      "muscleGroup": "Спина",
+      "equipment": "Свой вес",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-fsquat",
+      "ownerId": null,
+      "name": "Фронтальный присед",
+      "muscleGroup": "Ноги",
+      "equipment": "Штанга",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-dbbench",
+      "ownerId": null,
+      "name": "Жим гантелей лёжа",
+      "muscleGroup": "Грудь",
+      "equipment": "Гантели",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-latpull",
+      "ownerId": null,
+      "name": "Тяга верхнего блока",
+      "muscleGroup": "Спина",
+      "equipment": "Блок",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-triceps",
+      "ownerId": null,
+      "name": "Разгибание на блоке",
+      "muscleGroup": "Руки",
+      "equipment": "Блок",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-legpress",
+      "ownerId": null,
+      "name": "Жим ногами",
+      "muscleGroup": "Ноги",
+      "equipment": "Тренажёр",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-lateral",
+      "ownerId": null,
+      "name": "Махи гантелями в стороны",
+      "muscleGroup": "Плечи",
+      "equipment": "Гантели",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-legcurl",
+      "ownerId": null,
+      "name": "Сгибание ног",
+      "muscleGroup": "Ноги",
+      "equipment": "Тренажёр",
+      "isCustom": false,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-tbar",
+      "ownerId": "local",
+      "name": "Тяга Т-грифа",
+      "muscleGroup": "Спина",
+      "equipment": "Тренажёр",
+      "isCustom": true,
+      "createdAt": "2024-12-31T19:00:00.000Z"
+    },
+    {
+      "id": "ex-negpull",
+      "ownerId": "local",
+      "name": "Негативные подтягивания",
+      "muscleGroup": "Спина",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-dbrow",
+      "ownerId": "local",
+      "name": "Тяга гантели в наклоне",
+      "muscleGroup": "Спина",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-goblet",
+      "ownerId": "local",
+      "name": "Гоблет-присед",
+      "muscleGroup": "Ноги",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-hlr",
+      "ownerId": "local",
+      "name": "Подъёмы ног в висе",
+      "muscleGroup": "Кор",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-dips",
+      "ownerId": "local",
+      "name": "Брусья",
+      "muscleGroup": "Грудь",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-dbpress",
+      "ownerId": "local",
+      "name": "Жим гантелей сидя",
+      "muscleGroup": "Плечи",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-rdldb",
+      "ownerId": "local",
+      "name": "Румынская тяга с гантелями",
+      "muscleGroup": "Ноги",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-plank",
+      "ownerId": "local",
+      "name": "Планка",
+      "muscleGroup": "Кор",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-dbtri",
+      "ownerId": "local",
+      "name": "Французский жим с гантелью",
+      "muscleGroup": "Руки",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-bandpull",
+      "ownerId": "local",
+      "name": "Подтягивания с резиной",
+      "muscleGroup": "Спина",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-auspull",
+      "ownerId": "local",
+      "name": "Австралийские подтягивания",
+      "muscleGroup": "Спина",
+      "equipment": "Свой вес",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    },
+    {
+      "id": "ex-bulg",
+      "ownerId": "local",
+      "name": "Болгарские сплит-приседы",
+      "muscleGroup": "Ноги",
+      "equipment": "Гантели",
+      "isCustom": true,
+      "createdAt": "2026-07-24T00:00:00.000Z"
+    }
+  ],
+  "programs": [
+    {
+      "id": "prog-my3day",
+      "ownerId": "local",
+      "name": "Моя программа — 3 дня",
+      "note": "3 дня в неделю, через день отдыха.",
+      "isDraft": false,
+      "createdAt": "2026-07-24T00:00:00.000Z",
+      "updatedAt": "2026-07-24T00:00:00.000Z",
+      "days": [
+        {
+          "id": "day-a",
+          "letter": "A",
+          "name": "Спина · грудь · ноги",
+          "items": [
+            { "id": "pl-a1", "exerciseId": "ex-pullup", "targetSets": 5, "repsMin": 1, "repsMax": 2, "restSec": 150 },
+            { "id": "pl-a2", "exerciseId": "ex-negpull", "targetSets": 3, "repsMin": 5, "repsMax": 10, "restSec": 120 },
+            { "id": "pl-a3", "exerciseId": "ex-dbrow", "targetSets": 3, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-a4", "exerciseId": "ex-dbbench", "targetSets": 4, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-a5", "exerciseId": "ex-goblet", "targetSets": 3, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-a6", "exerciseId": "ex-lateral", "targetSets": 3, "repsMin": 12, "repsMax": 15, "restSec": 60 },
+            { "id": "pl-a7", "exerciseId": "ex-hlr", "targetSets": 3, "repsMin": 10, "repsMax": 15, "restSec": 60 },
+            { "id": "pl-a8", "exerciseId": "ex-curl", "targetSets": 3, "repsMin": 10, "repsMax": 10, "restSec": 60 }
+          ]
+        },
+        {
+          "id": "day-b",
+          "letter": "B",
+          "name": "Брусья · плечи · кор",
+          "items": [
+            { "id": "pl-b1", "exerciseId": "ex-dips", "targetSets": 4, "repsMin": 6, "repsMax": 8, "restSec": 150 },
+            { "id": "pl-b2", "exerciseId": "ex-dbrow", "targetSets": 4, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-b3", "exerciseId": "ex-dbpress", "targetSets": 3, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-b4", "exerciseId": "ex-rdldb", "targetSets": 3, "repsMin": 10, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-b5", "exerciseId": "ex-lateral", "targetSets": 3, "repsMin": 12, "repsMax": 15, "restSec": 60 },
+            { "id": "pl-b6", "exerciseId": "ex-plank", "targetSets": 3, "repsMin": 45, "repsMax": 60, "restSec": 60 },
+            { "id": "pl-b7", "exerciseId": "ex-dbtri", "targetSets": 3, "repsMin": 10, "repsMax": 10, "restSec": 60 }
+          ]
+        },
+        {
+          "id": "day-c",
+          "letter": "C",
+          "name": "Подтягивания · сплит",
+          "items": [
+            { "id": "pl-c1", "exerciseId": "ex-bandpull", "targetSets": 4, "repsMin": 6, "repsMax": 8, "restSec": 150 },
+            { "id": "pl-c2", "exerciseId": "ex-auspull", "targetSets": 3, "repsMin": 10, "repsMax": 12, "restSec": 90 },
+            { "id": "pl-c3", "exerciseId": "ex-dbpress", "targetSets": 3, "repsMin": 8, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-c4", "exerciseId": "ex-bulg", "targetSets": 3, "repsMin": 10, "repsMax": 10, "restSec": 90 },
+            { "id": "pl-c5", "exerciseId": "ex-lateral", "targetSets": 3, "repsMin": 12, "repsMax": 15, "restSec": 60 },
+            { "id": "pl-c6", "exerciseId": "ex-curl", "targetSets": 2, "repsMin": 10, "repsMax": 10, "restSec": 60 },
+            { "id": "pl-c7", "exerciseId": "ex-dbtri", "targetSets": 2, "repsMin": 10, "repsMax": 10, "restSec": 60 }
+          ]
+        }
+      ]
+    }
+  ],
+  "sessions": [],
+  "settings": {
+    "units": "kg",
+    "defaultRestSec": 60,
+    "soundOn": true,
+    "theme": "dark"
+  }
+}

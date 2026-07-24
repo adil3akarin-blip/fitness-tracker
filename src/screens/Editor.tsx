@@ -2,19 +2,33 @@ import { useState, type CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
-import { uid } from '../lib/util'
+import { mmss, uid } from '../lib/util'
 import type { Program, ProgramDay } from '../types'
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+const DEFAULT_REST_SEC = 120 // отдых для только что добавленного упражнения
+
+const stepBtn: CSSProperties = { width: 26, height: 26, border: 0, background: 'var(--bg)', color: 'var(--green)', borderRadius: 7, cursor: 'pointer', display: 'grid', placeItems: 'center' }
 
 function Step({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const btn: CSSProperties = { width: 26, height: 26, border: 0, background: 'var(--bg)', color: 'var(--green)', borderRadius: 7, cursor: 'pointer', display: 'grid', placeItems: 'center' }
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <button style={btn} onClick={() => onChange(value - 1)}><Icon name="minus" style={{ fontSize: 14 }} /></button>
+      <button style={stepBtn} onClick={() => onChange(value - 1)}><Icon name="minus" style={{ fontSize: 14 }} /></button>
       <b style={{ minWidth: 16, textAlign: 'center' }}>{value}</b>
-      <button style={btn} onClick={() => onChange(value + 1)}><Icon name="plus" style={{ fontSize: 14 }} /></button>
+      <button style={stepBtn} onClick={() => onChange(value + 1)}><Icon name="plus" style={{ fontSize: 14 }} /></button>
+    </span>
+  )
+}
+
+/** Отдых между подходами — шаг 15 с, 0:00…10:00. */
+function RestStep({ sec, onChange }: { sec: number; onChange: (v: number) => void }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: 12 }}>
+      <Icon name="clock" style={{ fontSize: 13 }} /> отдых
+      <button style={stepBtn} onClick={() => onChange(sec - 15)}><Icon name="minus" style={{ fontSize: 14 }} /></button>
+      <b style={{ minWidth: 34, textAlign: 'center', color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{mmss(sec)}</b>
+      <button style={stepBtn} onClick={() => onChange(sec + 15)}><Icon name="plus" style={{ fontSize: 14 }} /></button>
     </span>
   )
 }
@@ -41,7 +55,7 @@ export default function Editor() {
   const addItem = (dayId: string, exerciseId: string) =>
     updateDay(dayId, (day) => ({
       ...day,
-      items: [...day.items, { id: uid(), exerciseId, targetSets: 3, repsMin: 10, repsMax: 10, restSec: data.settings.defaultRestSec }],
+      items: [...day.items, { id: uid(), exerciseId, targetSets: 3, repsMin: 10, repsMax: 10, restSec: DEFAULT_REST_SEC }],
     }))
   const removeItem = (dayId: string, itemId: string) =>
     updateDay(dayId, (day) => ({ ...day, items: day.items.filter((it) => it.id !== itemId) }))
@@ -81,10 +95,13 @@ export default function Editor() {
               return (
                 <div className="plan" key={it.id}>
                   <div className="pn">{ex?.name ?? '—'}<small>{ex ? `${ex.muscleGroup} · ${ex.equipment}` : ''}</small></div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-                    <Step value={it.targetSets} onChange={(v) => updateDay(day.id, (d) => ({ ...d, items: d.items.map((x) => (x.id === it.id ? { ...x, targetSets: clamp(v, 1, 10) } : x)) }))} />
-                    <span style={{ color: 'var(--muted)' }}>×</span>
-                    <Step value={it.repsMin} onChange={(v) => updateDay(day.id, (d) => ({ ...d, items: d.items.map((x) => (x.id === it.id ? { ...x, repsMin: clamp(v, 1, 30), repsMax: clamp(v, 1, 30) } : x)) }))} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 7 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                      <Step value={it.targetSets} onChange={(v) => updateDay(day.id, (d) => ({ ...d, items: d.items.map((x) => (x.id === it.id ? { ...x, targetSets: clamp(v, 1, 10) } : x)) }))} />
+                      <span style={{ color: 'var(--muted)' }}>×</span>
+                      <Step value={it.repsMin} onChange={(v) => updateDay(day.id, (d) => ({ ...d, items: d.items.map((x) => (x.id === it.id ? { ...x, repsMin: clamp(v, 1, 30), repsMax: clamp(v, 1, 30) } : x)) }))} />
+                    </div>
+                    <RestStep sec={it.restSec} onChange={(v) => updateDay(day.id, (d) => ({ ...d, items: d.items.map((x) => (x.id === it.id ? { ...x, restSec: clamp(v, 0, 600) } : x)) }))} />
                   </div>
                   <button className="rm" onClick={() => removeItem(day.id, it.id)}><Icon name="x" /></button>
                 </div>

@@ -1,24 +1,29 @@
 import { useEffect, useRef } from 'react'
-import { BAR_KG, platesPerSide } from '../lib/plates'
+import { BAR, platesPerSide } from '../lib/plates'
 import { ruNum } from '../lib/util'
+import { toDisplayWeight, weightLabel, type Units } from '../lib/units'
 import type { Equipment } from '../types'
 
 /** «Живая» визуализация веса над степпером. Чистый рендер: ничего не пишет,
- *  ввод не перехватывает (pointer-events: none на обёртке). */
-export default function WeightVisual({ equipment, weight, reps }: {
+ *  ввод не перехватывает (pointer-events: none на обёртке). Вес приходит в кг —
+ *  внутри переводим в отображаемые единицы (штанга/гантель/стек физически
+ *  моделируют блины выбранной системы). */
+export default function WeightVisual({ equipment, weight, reps, units }: {
   equipment?: Equipment
   weight: number
   reps: number
+  units: Units
 }) {
   if (!equipment) return null
+  const disp = toDisplayWeight(weight, units)
   switch (equipment) {
     case 'Штанга':
-      return <div className="wv"><Barbell weight={weight} /></div>
+      return <div className="wv"><Barbell weight={disp} units={units} /></div>
     case 'Гантели':
-      return <div className="wv"><Dumbbell weight={weight} /></div>
+      return <div className="wv"><Dumbbell weight={disp} units={units} /></div>
     case 'Блок':
     case 'Тренажёр':
-      return <div className="wv"><Stack weight={weight} /></div>
+      return <div className="wv"><Stack weight={disp} /></div>
     case 'Свой вес':
       return <div className="wv"><Tally reps={reps} /></div>
     default:
@@ -28,17 +33,17 @@ export default function WeightVisual({ equipment, weight, reps }: {
 
 /* ---------- Штанга ---------- */
 
-// размеры блинов {кг: [высота, ширина]}
+// размеры блинов {номинал: [высота, ширина]} — метрические и имперские
 const PLATE_SIZE: Record<number, [number, number]> = {
-  25: [96, 24], 20: [90, 22], 15: [78, 20], 10: [64, 18], 5: [48, 14], 2.5: [38, 11], 1.25: [28, 9],
+  45: [96, 24], 35: [82, 21], 25: [96, 24], 20: [90, 22], 15: [78, 20], 10: [64, 18], 5: [48, 14], 2.5: [38, 11], 1.25: [28, 9],
 }
-// соревновательные цвета блинов
+// соревновательные цвета блинов (по роли номинала в наборе)
 const PLATE_COLOR: Record<number, string> = {
-  25: '#EF4444', 20: '#3B82F6', 15: '#EAB308', 10: 'var(--green)', 5: '#E5E7EB', 2.5: '#4B5563', 1.25: '#9CA3AF',
+  45: '#EF4444', 35: '#3B82F6', 25: '#EAB308', 20: '#3B82F6', 15: '#EAB308', 10: 'var(--green)', 5: '#E5E7EB', 2.5: '#4B5563', 1.25: '#9CA3AF',
 }
-// цвет подписи номинала (только на блинах ≥ 10 кг)
+// цвет подписи номинала (только на крупных блинах)
 const PLATE_INK: Record<number, string> = {
-  25: 'rgba(255,255,255,.95)', 20: 'rgba(255,255,255,.95)', 15: '#4A3A05', 10: 'var(--green-ink)',
+  45: 'rgba(255,255,255,.95)', 35: 'rgba(255,255,255,.95)', 25: '#4A3A05', 20: 'rgba(255,255,255,.95)', 15: '#4A3A05', 10: 'var(--green-ink)',
 }
 
 type PlateInst = { p: number; key: string; isNew: boolean }
@@ -55,11 +60,11 @@ function annotate(plates: number[], prev: number[]): PlateInst[] {
   })
 }
 
-function Barbell({ weight }: { weight: number }) {
+function Barbell({ weight, units }: { weight: number; units: Units }) {
   const prevRef = useRef<number[]>([])
   const visRef = useRef<HTMLDivElement>(null)
 
-  const { plates, remainder } = platesPerSide(weight)
+  const { plates, remainder } = platesPerSide(weight, units)
 
   // «вздрагивание» визуала при изменении веса (перезапуск анимации без ремаунта)
   useEffect(() => {
@@ -78,7 +83,7 @@ function Barbell({ weight }: { weight: number }) {
 
   if (weight <= 0) return null
 
-  const tooLight = weight < BAR_KG
+  const tooLight = weight < BAR[units]
 
   const plate = (inst: PlateInst, side: 'l' | 'r') => {
     const [h, w] = PLATE_SIZE[inst.p]
@@ -113,13 +118,13 @@ function Barbell({ weight }: { weight: number }) {
       </div>
       <div className="wv-bb-cap">
         {tooLight ? (
-          <span className="wv-mut">легче грифа ({BAR_KG} кг)</span>
+          <span className="wv-mut">легче грифа ({BAR[units]} {weightLabel(units)})</span>
         ) : plates.length === 0 ? (
           <span className="wv-mut">гриф без блинов</span>
         ) : (
           <>
             <span className="wv-acc">на сторону: {plates.map(ruNum).join(' + ')}</span>
-            {remainder > 0 ? <span className="wv-mut"> · ещё {ruNum(remainder)} кг не разложить</span> : null}
+            {remainder > 0 ? <span className="wv-mut"> · ещё {ruNum(remainder)} {weightLabel(units)} не разложить</span> : null}
           </>
         )}
       </div>
@@ -129,10 +134,12 @@ function Barbell({ weight }: { weight: number }) {
 
 /* ---------- Гантель ---------- */
 
-function Dumbbell({ weight }: { weight: number }) {
+function Dumbbell({ weight, units }: { weight: number; units: Units }) {
   if (weight <= 0) return null
-  const h = Math.min(104, 40 + weight * 1.6)
-  const w = Math.min(40, 16 + weight * 0.45)
+  // масштаб визуала откалиброван под кг; в фунтах числа крупнее — сжимаем коэффициенты
+  const k = units === 'lb' ? 0.45 : 1
+  const h = Math.min(104, 40 + weight * 1.6 * k)
+  const w = Math.min(40, 16 + weight * 0.45 * k)
   const head = (
     <div className="wv-db-head" style={{ height: h, width: w }}>
       {weight >= 2 ? <span>{ruNum(weight)}</span> : null}

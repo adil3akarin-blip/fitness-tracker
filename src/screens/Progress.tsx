@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
 import { exercisePR, isRepsBased, progressableExerciseIds, topRepsSeries, topWeightSeries } from '../lib/calc'
+import { toDisplayWeight, weightLabel } from '../lib/units'
+import { Collapse } from '../components/Collapse'
 
 type Range = 30 | 90 | 9999
 type Pt = { date: string; value: number }
@@ -43,6 +45,7 @@ function Spark({ values, tone }: { values: number[]; tone: 'up' | 'down' | 'flat
 export default function Progress() {
   const { data, exerciseById } = useStore()
   const { sessions } = data
+  const units = data.settings.units
 
   const exIds = useMemo(() => progressableExerciseIds(sessions), [sessions])
   const [range, setRange] = useState<Range>(30)
@@ -69,7 +72,7 @@ export default function Progress() {
           name: ex?.name ?? '—',
           group: ex?.muscleGroup ?? '',
           rb,
-          unit: rb ? 'повт.' : 'кг',
+          unit: rb ? 'повт.' : weightLabel(units),
           allSeries,
           pr: exercisePR(sessions, id),
           sess,
@@ -78,7 +81,7 @@ export default function Progress() {
         }
       })
       .sort((a, b) => b.lastDate.localeCompare(a.lastDate))
-  }, [sessions, exIds, exerciseById])
+  }, [sessions, exIds, exerciseById, units])
 
   const groups = useMemo(() => {
     const set = new Set<string>()
@@ -148,6 +151,10 @@ export default function Progress() {
             const first = vals[0] ?? last
             const delta = last - first
             const tone: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'
+            // весовые значения — в выбранных единицах; reps-based показываем как есть
+            const dispVal = (v: number) => (s.rb ? v : toDisplayWeight(v, units))
+            const lastD = dispVal(last)
+            const deltaD = lastD - dispVal(first)
             const open = openId === s.id
             const max = Math.max(...vals, 1)
             const min = Math.min(...vals, max) * 0.9
@@ -160,17 +167,17 @@ export default function Progress() {
                   </div>
                   <Spark values={vals} tone={tone} />
                   <div className="val">
-                    <div className="cur">{last}<small> {s.unit}</small></div>
+                    <div className="cur">{lastD}<small> {s.unit}</small></div>
                     {delta !== 0 && vals.length > 1 && (
                       <div className={'d ' + tone}>
-                        {delta > 0 ? '+' : ''}{delta} {s.unit}
+                        {deltaD > 0 ? '+' : ''}{deltaD} {s.unit}
                       </div>
                     )}
                   </div>
                   <Icon name="chev-d" className={'chev' + (open ? ' up' : '')} />
                 </button>
 
-                {open && (
+                <Collapse open={open}>
                   <div className="prow-detail">
                     {win.length === 0 ? (
                       <div className="empty" style={{ padding: '18px 8px' }}>
@@ -199,13 +206,13 @@ export default function Progress() {
                       </div>
                     ) : (
                       <div className="pr3">
-                        <div className="b"><div className="v">{s.pr.maxWeight}<small> кг</small></div><div className="k">макс вес</div></div>
-                        <div className="b"><div className="v">{s.pr.best1RM}<small> кг</small></div><div className="k">расч. 1ПМ</div></div>
+                        <div className="b"><div className="v">{toDisplayWeight(s.pr.maxWeight, units)}<small> {weightLabel(units)}</small></div><div className="k">макс вес</div></div>
+                        <div className="b"><div className="v">{toDisplayWeight(s.pr.best1RM, units)}<small> {weightLabel(units)}</small></div><div className="k">расч. 1ПМ</div></div>
                         <div className="b"><div className="v">{s.pr.maxReps}<small> раз</small></div><div className="k">макс повт.</div></div>
                       </div>
                     )}
                   </div>
-                )}
+                </Collapse>
               </div>
             )
           })}

@@ -285,10 +285,11 @@ input,select{font-family:inherit}
 
 /* ---- Плавающий таб-бар (flex-поток = стабильная позиция на iOS) ---- */
 .tabbar{flex:none;position:relative;z-index:30;display:flex;gap:2px;margin:0 14px calc(var(--tab-float) + var(--sab));padding:6px;border-radius:999px;background:rgba(15,21,33,.60);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 18px 44px rgba(1,4,12,.55)}
-.tab{flex:1;background:none;border:0;color:var(--dim);font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 9px;border-radius:999px;cursor:pointer;transition:color .15s, background .2s var(--ease)}
+.tab-pill{position:absolute;left:6px;top:6px;bottom:6px;width:calc((100% - 12px - 6px)/4);border-radius:999px;background:rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);pointer-events:none;transition:transform .35s cubic-bezier(.3,1.35,.4,1)}
+.tab{position:relative;flex:1;background:none;border:0;color:var(--dim);font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 9px;border-radius:999px;cursor:pointer;transition:color .15s, background .2s var(--ease)}
 .tab .ic{font-size:21px;transition:transform .12s var(--ease)}
 .tab:active .ic{transform:scale(.88)}
-.tab.on{color:var(--green);background:rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.tab.on{color:var(--green)}
 
 /* ---- Active workout (без таббара) ---- */
 .app.plain .screen{padding-bottom:calc(24px + var(--sab))}
@@ -299,7 +300,7 @@ input,select{font-family:inherit}
 .wk-top .tt{font-weight:700}
 .wk-top .tt .s{color:var(--muted);font-size:12px;font-weight:500}
 .wk-top .clock{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--green);font-weight:700;background:var(--green-soft);border:1px solid rgba(52,217,127,.3);padding:6px 11px;border-radius:999px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
-.wk-progress{height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.wk-progress{position:relative;height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:14px}
 .wk-progress > i{display:block;height:100%;background:linear-gradient(90deg,#43E890,#22C55E);border-radius:99px;box-shadow:0 0 12px rgba(52,217,127,.6);transition:width .5s cubic-bezier(.34,1.65,.45,1)}
 .exq{border-radius:20px;margin-bottom:10px;overflow:hidden}
 .exq.done{opacity:.55}
@@ -333,7 +334,15 @@ input,select{font-family:inherit}
 .wk-discard:active{opacity:.7}
 .restbar{position:fixed;left:50%;transform:translateX(-50%) translateY(180%);bottom:calc(var(--tab-float) + var(--sab));width:min(432px,calc(100% - 28px - var(--sal) - var(--sar)));background:radial-gradient(140% 160% at 20% -30%,rgba(52,217,127,.30),transparent 58%),rgba(13,22,18,.66);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);border:1px solid rgba(52,217,127,.38);border-radius:26px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:40;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 44px rgba(1,4,12,.55);transition:transform .45s cubic-bezier(.32,1.4,.45,1)}
 .restbar.show{transform:translateX(-50%) translateY(0)}
-.restbar .ring{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green);min-width:74px}
+.restbar .ring{position:relative;width:56px;height:56px;flex:none}
+.restbar .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.restbar .ring circle{fill:none;stroke-width:4}
+.restbar .ring .tr{stroke:rgba(255,255,255,.10)}
+.restbar .ring .fg{stroke:var(--green);stroke-linecap:round;stroke-dasharray:150.8;transition:stroke-dashoffset 1s linear,stroke .3s}
+.restbar .ring .num{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green)}
+.restbar .ring.hot .fg{stroke:var(--amber)}
+.restbar .ring.hot .num{color:var(--amber);animation:tick 1s ease-out infinite}
+@keyframes tick{0%{transform:scale(1.22)}35%{transform:scale(1)}100%{transform:scale(1)}}
 .restbar .lab{font-size:12px;color:var(--muted)}
 .restbar .lab b{color:var(--text);display:block;font-size:14px}
 .restbar .acts{margin-left:auto;display:flex;gap:8px}
@@ -461,6 +470,16 @@ input,select{font-family:inherit}
   78%{transform:scaleY(.97)}
   100%{transform:scaleY(1)}
 }
+/* Четвёртая проекция пружины — на scale (амплитуда 0.12). Для микро-попа значений. */
+@keyframes whip-pop{
+  0%{transform:scale(1)}
+  32%{transform:scale(1.12)}
+  58%{transform:scale(.95)}
+  78%{transform:scale(1.02)}
+  92%{transform:scale(.99)}
+  100%{transform:scale(1)}
+}
+.popping{animation:whip-pop 260ms var(--ease)}
 
 /* Вход экранов — дети приземляются каскадом */
 .screen>*{animation:whip-in .5s var(--ease) both}
@@ -488,8 +507,49 @@ input,select{font-family:inherit}
 .whipping .btn-primary{--wa:calc(var(--whip-a,6px)*.45)}
 .whipping .setrow:last-of-type{--wa:calc(var(--whip-a,6px)*.6)} /* свежезаписанная строка */
 
+/* PR-момент: золотая вспышка по границе карточки (анимируется только opacity псевдоэлемента) */
+.pr-flash{position:relative}
+.pr-flash::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  border:1.5px solid var(--amber);
+  box-shadow:0 0 26px rgba(251,191,36,.45),inset 0 0 22px rgba(251,191,36,.18);
+  opacity:0;animation:pr-ring 900ms var(--ease) both;
+}
+@keyframes pr-ring{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+.pr-badge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:7px;background:linear-gradient(180deg,#FDE68A,var(--amber));color:#241a03;font-size:10px;font-weight:800;letter-spacing:.04em;vertical-align:1px;animation:whip-pop .5s var(--ease) .1s both}
+
+/* Микро-тактильность */
+.setrow.filled .prev .ic{stroke-dasharray:22;animation:check-draw .3s var(--ease) both}
+@keyframes check-draw{from{stroke-dashoffset:22}to{stroke-dashoffset:0}}
+.wk-progress.full::after{content:"";position:absolute;top:0;bottom:0;left:0;width:36%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:bar-glint .7s ease-out .15s both}
+@keyframes bar-glint{from{transform:translateX(-120%)}to{transform:translateX(340%)}}
+.wk-top .clock .ic{animation:clock-breathe 2.4s ease-in-out infinite}
+@keyframes clock-breathe{0%,100%{opacity:.5}50%{opacity:1}}
+.streak-flame{color:var(--amber);font-size:15px;margin-left:4px;transform-origin:50% 85%;animation:flame-flicker 1.9s ease-in-out infinite}
+@keyframes flame-flicker{0%,100%{transform:scale(1) rotate(-2deg)}33%{transform:scale(1.07) rotate(2deg)}66%{transform:scale(.97) rotate(-1deg)}}
+
+/* Праздник финиша: конфетти + подпрыгивающие чипы «топ» */
+.confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
+.screen>.confetti{animation:none} /* исключить из каскада whip-in: transform ломает position:fixed */
+.confetti i{position:absolute;left:50%;top:34%;border-radius:2px;opacity:0;animation:conf-fly cubic-bezier(.16,.8,.3,1) both}
+@keyframes conf-fly{
+  0%{opacity:1;transform:none}
+  70%{opacity:1}
+  100%{opacity:0;transform:translate(var(--cx),var(--cy)) rotate(var(--cr))}
+}
+.celebrate .setrow .chip{animation:whip-pop .45s var(--ease) .4s both}
+
+/* Collapse: плавное раскрытие по высоте (grid-rows 0fr→1fr) */
+.clps{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s var(--ease)}
+.clps.open{grid-template-rows:1fr}
+.clps>div{min-height:0;overflow:hidden}
+
 @media (prefers-reduced-motion: reduce){
   .wv *,.wv-bump{animation:none!important;transition:none!important}
   .app::before{animation:none}
   .whipping,.whipping *,.screen>*,.tab.on .ic,.bar,.wv-bump{animation:none!important}
+  .popping,.pr-badge,.pr-flash::after,.confetti i,.setrow.filled .prev .ic,
+  .wk-progress.full::after,.wk-top .clock .ic,.streak-flame,.restbar .ring.hot .num,
+  .celebrate .setrow .chip{animation:none!important}
+  .clps,.tab-pill,.restbar .ring .fg{transition:none!important}
 }

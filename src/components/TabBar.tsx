@@ -11,8 +11,10 @@ const TABS: { to: string; label: string; icon: IconName; match: (p: string) => b
 export function TabBar() {
   const { pathname } = useLocation()
   const nav = useNavigate()
+  const idx = TABS.findIndex((t) => t.match(pathname))
   return (
     <nav className="tabbar">
+      {idx >= 0 && <span className="tab-pill" style={{ transform: `translateX(calc(${idx} * (100% + 2px)))` }} />}
       {TABS.map((t) => (
         <button key={t.to} className={'tab' + (t.match(pathname) ? ' on' : '')} onClick={() => nav(t.to)}>
           <Icon name={t.icon} />

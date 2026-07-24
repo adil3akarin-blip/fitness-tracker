@@ -71,7 +71,6 @@ export interface WorkoutSession {
 
 export interface Settings {
   units: 'kg' | 'lb'
-  defaultRestSec: number
   soundOn: boolean
   theme: 'dark' | 'light' | 'auto'
 }

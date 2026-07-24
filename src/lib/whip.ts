@@ -21,7 +21,16 @@ export function whip(el: HTMLElement | null, input: WhipInput): void {
   el.style.setProperty('--whip-a', `${amp.toFixed(1)}px`)
   el.style.setProperty('--whip-d', `${Math.round(dur)}ms`)
   // перезапуск анимации без ремаунта (приём как в WeightVisual)
-  el.classList.remove('whipping')
+  el.classList.remove('whipping', 'pr-flash')
   void el.offsetWidth
   el.classList.add('whipping')
+  if (input.pr) el.classList.add('pr-flash')
+}
+
+/** Микро-поп значения (степперы и т.п.): перезапускает класс .popping. */
+export function pop(el: HTMLElement | null): void {
+  if (!el) return
+  el.classList.remove('popping')
+  void el.offsetWidth
+  el.classList.add('popping')
 }

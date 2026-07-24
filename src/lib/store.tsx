@@ -16,6 +16,7 @@ interface StoreCtx {
   updateSettings: (patch: Partial<Settings>) => void
   clearDemo: () => void
   resetAll: () => void
+  replaceAll: (next: AppData) => void
 }
 
 const Ctx = createContext<StoreCtx | null>(null)
@@ -55,6 +56,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         clearData()
         clearActiveWorkout()
         setData(seedData())
+      },
+      replaceAll: (next) => {
+        clearActiveWorkout()
+        setData(next)
       },
     }),
     [data],

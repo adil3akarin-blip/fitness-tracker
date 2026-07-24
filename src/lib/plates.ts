@@ -1,19 +1,24 @@
 // Чистая математика раскладки блинов на гриф — без React и без побочных эффектов.
 
-export const BAR_KG = 20
-export const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25]
+import type { Units } from './units'
 
-const MAX_KG = 300 // клампим сверху, чтобы визуал не разъезжался на абсурдных весах
+// вес грифа и набор блинов зависят от системы единиц (метрика / имперская)
+export const BAR: Record<Units, number> = { kg: 20, lb: 45 }
+export const PLATE_SET: Record<Units, number[]> = {
+  kg: [25, 20, 15, 10, 5, 2.5, 1.25],
+  lb: [45, 35, 25, 10, 5, 2.5],
+}
+const MAX: Record<Units, number> = { kg: 300, lb: 660 } // клампим сверху, чтобы визуал не разъезжался
 
-/** Жадная раскладка блинов на одну сторону грифа.
- *  remainder — вес на сторону, который блинами не набирается (свободный ввод, напр. 77 кг).
- *  Пример: platesPerSide(77) → на сторону 28,5 → { plates: [25, 2.5], remainder: 1 }. */
-export function platesPerSide(totalKg: number): { plates: number[]; remainder: number } {
-  const total = Math.min(totalKg, MAX_KG)
-  let perSide = (total - BAR_KG) / 2
+/** Жадная раскладка блинов на одну сторону грифа. totalDisplay — общий вес
+ *  в ЕДИНИЦАХ показа (не кг). remainder — вес на сторону, который блинами не
+ *  набирается (свободный ввод). Пример: platesPerSide(77,'kg') → { plates:[25,2.5], remainder:1 }. */
+export function platesPerSide(totalDisplay: number, u: Units): { plates: number[]; remainder: number } {
+  const total = Math.min(totalDisplay, MAX[u])
+  let perSide = (total - BAR[u]) / 2
   const plates: number[] = []
   if (perSide <= 0) return { plates, remainder: 0 }
-  for (const p of PLATES) {
+  for (const p of PLATE_SET[u]) {
     while (perSide + 1e-6 >= p) {
       plates.push(p)
       perSide = +(perSide - p).toFixed(4)
