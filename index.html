@@ -10,6 +10,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Fitness Tracker</title>
+    <!-- До CSS: iOS PWA cold-start врёт в 100dvh — сразу ставим 100vh -->
+    <script>
+      (function () {
+        if (window.navigator.standalone === true) {
+          document.documentElement.style.setProperty('--app-height', '100vh')
+          document.documentElement.classList.add('ios-standalone')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
