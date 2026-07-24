@@ -54,7 +54,7 @@ input,select{font-family:inherit}
   to{transform:translate3d(2.5%,2%,0) rotate(3deg) scale(1.08)}
 }
 @media(min-width:520px){.app{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 40px 90px rgba(0,0,0,.55)}}
-.screen{position:relative;z-index:1;flex:1;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 10px) 16px calc(104px + env(safe-area-inset-bottom));scrollbar-width:none;animation:screenIn .28s var(--ease)}
+.screen{position:relative;z-index:1;flex:1;overflow-y:auto;padding:env(safe-area-inset-top) 16px calc(104px + env(safe-area-inset-bottom));scrollbar-width:none;animation:screenIn .28s var(--ease)}
 .screen::-webkit-scrollbar{display:none}
 @keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
@@ -72,7 +72,7 @@ input,select{font-family:inherit}
 .ic.fill{fill:currentColor;stroke:none}
 
 /* ---- Общие ---- */
-.appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 0 14px}
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px}
 .appbar h1{font-size:var(--fs-h1);margin:0;letter-spacing:-.02em;line-height:1.1}
 .appbar .sub{color:var(--muted);font-size:13px;margin-top:3px}
 .appbar.push{justify-content:flex-start;gap:12px}
