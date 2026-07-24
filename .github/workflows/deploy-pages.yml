@@ -28,8 +28,11 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
         run: npm run build
-      # SPA: прямые URL маршрутов отдают index.html вместо 404
-      - run: cp dist/index.html dist/404.html
+      # SPA deep-links на Pages + отключение Jekyll (не трогает SW/_ файлы)
+      - name: Prepare GitHub Pages SPA
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

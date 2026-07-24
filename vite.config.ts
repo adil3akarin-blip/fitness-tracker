@@ -15,8 +15,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // SW и scope строго под subdirectory GitHub Pages
+      base,
+      scope: base,
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+      workbox: {
+        // offline SPA: любые навигации в scope отдают index.html
+        navigateFallback: 'index.html',
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      },
       manifest: {
+        id: base,
         name: 'Fitness Tracker',
         short_name: 'Fitness',
         description: 'Журнал силовых тренировок и прогресс',
