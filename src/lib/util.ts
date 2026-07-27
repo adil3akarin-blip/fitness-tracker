@@ -44,6 +44,15 @@ export function plural(n: number, one: string, few: string, many: string) {
   if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few
   return many
 }
+/** «сегодня» / «вчера» / «5 дней назад» — давность нагрузки на карте мышц */
+export function daysAgoLabel(days: number | null): string {
+  if (days === null) return 'ни разу'
+  if (days < 1) return 'сегодня'
+  if (days < 2) return 'вчера'
+  const n = Math.floor(days)
+  return `${n} ${plural(n, 'день', 'дня', 'дней')} назад`
+}
+
 /** начало недели (пн) для группировки журнала */
 export function startOfWeek(d: Date) {
   const x = new Date(d)

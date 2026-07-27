@@ -1,4 +1,5 @@
-import type { ID, LoggedSet, WorkoutSession } from '../types'
+import { MUSCLE_IDS, type Exercise, type ID, type LoggedSet, type Muscle, type WorkoutSession } from '../types'
+import { muscleShares } from './muscles'
 
 /** Оценка одноповторного максимума по формуле Эпли. */
 export const epley1RM = (weight: number, reps: number) =>
@@ -72,6 +73,84 @@ export function isRepsBased(sessions: WorkoutSession[], exerciseId: ID): boolean
       if (set.weight > 0) return false
     }
   return hasWorking
+}
+
+// ---- Карта нагрузки по мышцам ----
+// Метрика — рабочие подходы за окно, а не тоннаж: тоннаж обнуляет работу со
+// своим весом (подтягивания дают 8 «единиц» против 480 у тяги) и не сравним
+// между мышцами. У подходов есть внятный ориентир: 10–20 в неделю на мышцу.
+
+/** Состояние мышцы на сегодня — основа цвета на карте. */
+export type MuscleState = 'recovering' | 'worked' | 'ready' | 'neglected'
+
+export interface MuscleLoad {
+  muscle: Muscle
+  sets: number // с учётом доли: вторичная мышца даёт полподхода
+  tonnage: number
+  daysSince: number | null // null = ни одного подхода за всю историю
+  state: MuscleState
+}
+
+const RECOVERY_DAYS = 2 // «ещё болит» — мышца под нагрузкой была вчера-позавчера
+const WORKED_DAYS = 4
+const NEGLECT_DAYS = 10
+/** Ориентир недельного объёма на мышцу (подходов). */
+export const SETS_LOW = 10
+export const SETS_HIGH = 20
+
+export function muscleStateOf(daysSince: number | null): MuscleState {
+  if (daysSince === null || daysSince > NEGLECT_DAYS) return 'neglected'
+  if (daysSince <= RECOVERY_DAYS) return 'recovering'
+  if (daysSince <= WORKED_DAYS) return 'worked'
+  return 'ready'
+}
+
+/** Нагрузка и свежесть каждой мышцы. now — параметр, чтобы расчёт был проверяем. */
+export function muscleLoads(
+  sessions: WorkoutSession[],
+  exerciseById: (id: ID) => Exercise | undefined,
+  windowDays = 7,
+  now = Date.now(),
+): MuscleLoad[] {
+  const since = now - windowDays * 864e5
+  const sets: Partial<Record<Muscle, number>> = {}
+  const ton: Partial<Record<Muscle, number>> = {}
+  const last: Partial<Record<Muscle, number>> = {}
+
+  for (const s of sessions)
+    for (const set of s.sets) {
+      if (set.warmup) continue
+      const ex = exerciseById(set.exerciseId)
+      if (!ex) continue // упражнение удалили из каталога — история остаётся, но разметки нет
+      const t = new Date(set.completedAt).getTime()
+      if (t > now) continue
+      for (const { muscle, share } of muscleShares(ex)) {
+        if (t > (last[muscle] ?? 0)) last[muscle] = t
+        if (t < since) continue
+        sets[muscle] = (sets[muscle] ?? 0) + share
+        ton[muscle] = (ton[muscle] ?? 0) + set.weight * set.reps * share
+      }
+    }
+
+  return MUSCLE_IDS.map((muscle) => {
+    const lt = last[muscle]
+    const daysSince = lt === undefined ? null : (now - lt) / 864e5
+    return {
+      muscle,
+      sets: Math.round((sets[muscle] ?? 0) * 10) / 10,
+      tonnage: Math.round(ton[muscle] ?? 0),
+      daysSince,
+      state: muscleStateOf(daysSince),
+    }
+  })
+}
+
+/** Что логично взять сегодня: восстановившиеся мышцы, начиная с самых недогруженных. */
+export function readyToTrain(loads: MuscleLoad[], limit = 3): MuscleLoad[] {
+  return loads
+    .filter((l) => l.state === 'ready' || l.state === 'neglected')
+    .sort((a, b) => a.sets - b.sets)
+    .slice(0, limit)
 }
 
 /** Лучший результат по повторам за каждую сессию (для графика упражнений со своим весом). */

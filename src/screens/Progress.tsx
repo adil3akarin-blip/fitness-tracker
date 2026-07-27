@@ -1,9 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
-import { exercisePR, isRepsBased, progressableExerciseIds, topRepsSeries, topWeightSeries } from '../lib/calc'
+import {
+  exercisePR, isRepsBased, muscleLoads, progressableExerciseIds, SETS_HIGH, SETS_LOW,
+  topRepsSeries, topWeightSeries,
+} from '../lib/calc'
 import { toDisplayWeight, weightLabel } from '../lib/units'
+import { daysAgoLabel, ruNum } from '../lib/util'
+import { MUSCLES, type Muscle } from '../types'
 import { Collapse } from '../components/Collapse'
+import MuscleMap, { STATE_LABEL } from '../components/MuscleMap'
 
 type Range = 30 | 90 | 9999
 type Pt = { date: string; value: number }
@@ -52,6 +58,13 @@ export default function Progress() {
   const [query, setQuery] = useState('')
   const [group, setGroup] = useState<string>('all')
   const [openId, setOpenId] = useState<string | undefined>()
+  const [sel, setSel] = useState<Muscle | null>(null)
+
+  // нагрузка по мышцам за неделю, самые загруженные сверху
+  const loads = useMemo(
+    () => muscleLoads(sessions, exerciseById).sort((a, b) => b.sets - a.sets),
+    [sessions, exerciseById],
+  )
 
   const summaries = useMemo(() => {
     return exIds
@@ -110,6 +123,32 @@ export default function Progress() {
   return (
     <div className="screen">
       <div className="appbar"><div><h1>Прогресс</h1><div className="sub">Все упражнения на одном экране</div></div></div>
+
+      <div className="card">
+        <div className="card-head"><div className="t"><Icon name="target" /> Мышцы за 7 дней</div></div>
+        <MuscleMap loads={loads} selected={sel} />
+        <div className="mlist">
+          {loads.map((l) => {
+            const vc = l.sets < SETS_LOW ? 'lo' : l.sets > SETS_HIGH ? 'hi' : ''
+            return (
+              <button
+                key={l.muscle}
+                className={'mrow' + (sel === l.muscle ? ' on' : '')}
+                onClick={() => setSel(sel === l.muscle ? null : l.muscle)}
+              >
+                <span className={'mm-dot s-' + l.state} />
+                <span className="txt">
+                  <span className="nm">{MUSCLES[l.muscle].label}</span>
+                  <span className="st">{STATE_LABEL[l.state]} · {daysAgoLabel(l.daysSince)}</span>
+                </span>
+                <span className="sets">
+                  <span className={vc}>{ruNum(l.sets)}</span><small> подх.</small>
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <div className="prog-search">
         <Icon name="search" />

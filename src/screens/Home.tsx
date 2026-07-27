@@ -1,10 +1,13 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon, type IconName } from '../icons'
-import { exercisePR, sessionVolume, weightedExerciseIds } from '../lib/calc'
+import { exercisePR, muscleLoads, readyToTrain, sessionVolume, weightedExerciseIds } from '../lib/calc'
 import { loadActiveWorkout } from '../lib/storage'
 import { plural, startOfWeek } from '../lib/util'
 import { fmtVolume, fmtWeight } from '../lib/units'
+import { MUSCLES } from '../types'
+import MuscleMap from '../components/MuscleMap'
 
 function streakWeeks(times: number[]): number {
   if (!times.length) return 0
@@ -63,6 +66,10 @@ export default function Home() {
   const thisWeek = sessions.filter((s) => new Date(s.startedAt).getTime() >= wkStart)
   const volKg = thisWeek.reduce((a, s) => a + sessionVolume(s), 0)
   const streak = streakWeeks(sessions.map((s) => new Date(s.startedAt).getTime()))
+
+  // карта мышц: что успело восстановиться к сегодняшнему дню
+  const loads = useMemo(() => muscleLoads(sessions, exerciseById), [sessions, exerciseById])
+  const ready = readyToTrain(loads)
 
   // недавние рекорды
   const prs = weightedExerciseIds(sessions)
@@ -131,6 +138,22 @@ export default function Home() {
         <div className="stat"><div className="v">{streak} <small>нед</small>{streak > 0 && <Icon name="flame" className="streak-flame" />}</div><div className="k">серия</div></div>
         <div className="stat"><div className="v">{fmtVolume(volKg, units).value}<small> {fmtVolume(volKg, units).unit}</small></div><div className="k">объём/нед</div></div>
       </div>
+
+      {sessions.length > 0 && (
+        <>
+          <div className="sec-label">Нагрузка по мышцам</div>
+          <div className="card mm-card" onClick={() => nav('/progress')}>
+            <MuscleMap loads={loads} compact />
+            <div className="mm-hint">
+              {ready.length > 0 ? (
+                <>Готовы к работе: <b>{ready.map((l) => MUSCLES[l.muscle].label.toLowerCase()).join(', ')}</b></>
+              ) : (
+                'Всё под нагрузкой — сегодня логичнее отдохнуть'
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {prs.length > 0 && (
         <>

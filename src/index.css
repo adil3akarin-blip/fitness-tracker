@@ -533,6 +533,47 @@ input,select{font-family:inherit}
 .streak-flame{color:var(--amber);font-size:15px;margin-left:4px;transform-origin:50% 85%;animation:flame-flicker 1.9s ease-in-out infinite}
 @keyframes flame-flicker{0%,100%{transform:scale(1) rotate(-2deg)}33%{transform:scale(1.07) rotate(2deg)}66%{transform:scale(.97) rotate(-1deg)}}
 
+/* ---- Карта мышц ----
+   Цвет = свежесть (можно ли грузить сегодня), число подходов — отдельно в списке.
+   Фиолетовый «давно не было» специально не серый: пропущенная мышца должна
+   бросаться в глаза, а не растворяться в фоне. */
+.mmap{display:flex;flex-direction:column;gap:12px}
+.mm-figs{display:flex;justify-content:center;gap:18px}
+.mm-fig{width:46%;max-width:150px;height:auto;overflow:visible}
+.mm-n{fill:rgba(255,255,255,.07);stroke:var(--glass-brd);stroke-width:.6}
+.mm-m{stroke-width:.8;transition:fill .25s var(--ease),fill-opacity .25s var(--ease)}
+.mm-m.s-recovering{fill:var(--red);fill-opacity:.72;stroke:var(--red)}
+.mm-m.s-worked{fill:var(--amber);fill-opacity:.62;stroke:var(--amber)}
+.mm-m.s-ready{fill:var(--green);fill-opacity:.62;stroke:var(--green)}
+.mm-m.s-neglected{fill:var(--violet);fill-opacity:.5;stroke:var(--violet-bright);stroke-dasharray:2.5 2}
+.mm-m.on{stroke:var(--text);stroke-width:1.6;stroke-dasharray:none;fill-opacity:.9}
+.mmap.compact .mm-fig{max-width:106px}
+.mmap.compact .mm-figs{gap:14px}
+.mm-card{cursor:pointer;transition:transform .08s}
+.mm-card:active{transform:scale(.99)}
+/* 2×2, иначе четыре подписи рвутся на 3+1 */
+.mm-legend{display:grid;grid-template-columns:auto auto;justify-content:center;gap:6px 14px;color:var(--muted);font-size:var(--fs-xs)}
+.mm-legend span{display:inline-flex;align-items:center;gap:5px}
+.mm-dot{width:8px;height:8px;border-radius:3px;flex:none}
+.mm-dot.s-recovering{background:var(--red)}
+.mm-dot.s-worked{background:var(--amber)}
+.mm-dot.s-ready{background:var(--green)}
+.mm-dot.s-neglected{background:var(--violet)}
+.mm-hint{color:var(--muted);font-size:var(--fs-sm);text-align:center;line-height:1.4}
+.mm-hint b{color:var(--text);font-weight:600}
+
+/* список мышц под картой — он же и тач-цель для выбора */
+.mlist{margin-top:14px;border-top:1px solid var(--border);padding-top:4px}
+.mrow{display:flex;align-items:center;gap:10px;width:100%;padding:9px 6px;border:0;background:transparent;text-align:left;cursor:pointer;border-radius:12px;transition:background .15s}
+.mrow.on{background:rgba(255,255,255,.07)}
+.mrow .txt{display:flex;flex-direction:column;min-width:0}
+.mrow .nm{font-size:var(--fs-body);font-weight:600}
+.mrow .st{color:var(--muted);font-size:var(--fs-xs);margin-top:1px}
+.mrow .sets{margin-left:auto;font-weight:700;font-size:var(--fs-body);text-align:right}
+.mrow .sets small{color:var(--muted);font-size:var(--fs-xs);font-weight:600}
+.mrow .sets .lo{color:var(--amber)}
+.mrow .sets .hi{color:var(--red)}
+
 /* Праздник финиша: конфетти + подпрыгивающие чипы «топ» */
 .confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
 .screen>.confetti{animation:none} /* исключить из каскада whip-in: transform ломает position:fixed */
