@@ -5,6 +5,7 @@ import {
   exercisePR, isRepsBased, muscleLoads, progressableExerciseIds, SETS_HIGH, SETS_LOW,
   topRepsSeries, topWeightSeries,
 } from '../lib/calc'
+import { muscleShares } from '../lib/muscles'
 import { toDisplayWeight, weightLabel } from '../lib/units'
 import { ruNum } from '../lib/util'
 import { MUSCLES, type Muscle } from '../types'
@@ -66,6 +67,31 @@ export default function Progress() {
     [sessions, exerciseById],
   )
 
+  // доля каждой мышцы в упражнении — по ней фильтруем список ниже
+  const sharesById = useMemo(() => {
+    const out = new Map<string, Partial<Record<Muscle, number>>>()
+    for (const id of exIds) {
+      const ex = exerciseById(id)
+      if (!ex) continue
+      const rec: Partial<Record<Muscle, number>> = {}
+      for (const { muscle, share } of muscleShares(ex)) rec[muscle] = share
+      out.set(id, rec)
+    }
+    return out
+  }, [exIds, exerciseById])
+
+  const shareOf = (id: string, m: Muscle) => sharesById.get(id)?.[m] ?? 0
+
+  // мышца и группа фильтруют по одной оси — включение одного снимает другое
+  const pickMuscle = (m: Muscle) => {
+    setSel((prev) => (prev === m ? null : m))
+    setGroup('all')
+  }
+  const pickGroup = (g: string) => {
+    setGroup(g)
+    setSel(null)
+  }
+
   const summaries = useMemo(() => {
     return exIds
       .map((id) => {
@@ -103,9 +129,15 @@ export default function Progress() {
   }, [summaries])
 
   const q = query.trim().toLowerCase()
-  const shown = summaries.filter(
-    (s) => (group === 'all' || s.group === group) && (!q || s.name.toLowerCase().includes(q)),
-  )
+  const shown = summaries
+    .filter(
+      (s) =>
+        (group === 'all' || s.group === group) &&
+        (!q || s.name.toLowerCase().includes(q)) &&
+        (!sel || shareOf(s.id, sel) > 0),
+    )
+    // при фильтре по мышце сверху то, где она основная, а не вспомогательная
+    .sort((a, b) => (sel ? shareOf(b.id, sel) - shareOf(a.id, sel) : 0))
 
   if (exIds.length === 0) {
     return (
@@ -134,7 +166,7 @@ export default function Progress() {
               <button
                 key={l.muscle}
                 className={'mrow' + (sel === l.muscle ? ' on' : '')}
-                onClick={() => setSel(sel === l.muscle ? null : l.muscle)}
+                onClick={() => pickMuscle(l.muscle)}
               >
                 <span className={'mm-dot s-' + l.state} />
                 <span className="txt">
@@ -161,11 +193,20 @@ export default function Progress() {
         {query && <button className="clr" onClick={() => setQuery('')} aria-label="Очистить"><Icon name="x" /></button>}
       </div>
 
+      {/* выбранная мышца заменяет чипы групп: иначе «Все» горело бы над отфильтрованным списком */}
       <div className="ex-pills prog-groups">
-        <div className={'p' + (group === 'all' ? ' on' : '')} onClick={() => setGroup('all')}>Все</div>
-        {groups.map((g) => (
-          <div key={g} className={'p' + (group === g ? ' on' : '')} onClick={() => setGroup(g)}>{g}</div>
-        ))}
+        {sel ? (
+          <div className="p on" onClick={() => setSel(null)}>
+            {MUSCLES[sel].label} <Icon name="x" />
+          </div>
+        ) : (
+          <>
+            <div className={'p' + (group === 'all' ? ' on' : '')} onClick={() => pickGroup('all')}>Все</div>
+            {groups.map((g) => (
+              <div key={g} className={'p' + (group === g ? ' on' : '')} onClick={() => pickGroup(g)}>{g}</div>
+            ))}
+          </>
+        )}
       </div>
       <div className="prog-range">
         <div className="seg">
@@ -177,7 +218,11 @@ export default function Progress() {
 
       {shown.length === 0 ? (
         <div className="empty" style={{ padding: '32px 8px' }}>
-          <div className="ed">Ничего не найдено</div>
+          <div className="ed">
+            {sel && !q
+              ? `${MUSCLES[sel].label} — за всё время ни одного упражнения на эту мышцу`
+              : 'Ничего не найдено'}
+          </div>
         </div>
       ) : (
         <div className="exlist">

@@ -31,6 +31,8 @@ const BY_EXERCISE_ID: Record<ID, MuscleSplit> = {
   'ex-lateral': { primary: ['side-delt'], secondary: ['front-delt', 'upper-back'] },
   'ex-legcurl': { primary: ['hamstrings'], secondary: ['calves'] },
   'ex-tbar': { primary: ['lats', 'upper-back'], secondary: ['biceps', 'rear-delt'] },
+  'ex-calf': { primary: ['calves'], secondary: [] },
+  'ex-crunch': { primary: ['abs'], secondary: [] },
 }
 
 /** Мышцы каждой группы — для отката, когда у упражнения нет разметки. */
