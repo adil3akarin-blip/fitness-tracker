@@ -376,6 +376,9 @@ input,select{font-family:inherit}
 .exdel{margin-left:auto;background:none;border:0;color:var(--dim);display:flex;font-size:16px;cursor:pointer;padding:4px}
 .exdel:active{color:var(--red)}
 .tag-mine{background:var(--violet);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
+/* «мышцы не уточнены» — статус, а не ошибка: карта работает, просто грубее */
+.tag-rough{border:1px solid var(--border);color:var(--dim);font-size:9px;font-weight:600;padding:2px 6px;border-radius:6px;white-space:nowrap}
+.exrow.tap{cursor:pointer}
 .switch{width:44px;height:26px;border-radius:999px;background:rgba(255,255,255,.16);position:relative;cursor:pointer;transition:background .2s;flex:none;border:0;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
 .switch.on{background:var(--green);box-shadow:inset 0 1px 2px rgba(0,0,0,.15),0 4px 12px rgba(52,217,127,.35)}
 .switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.35);transition:left .2s var(--ease)}
@@ -573,6 +576,13 @@ input,select{font-family:inherit}
 .mrow .sets small{color:var(--muted);font-size:var(--fs-xs);font-weight:600}
 .mrow .sets .lo{color:var(--amber)}
 .mrow .sets .hi{color:var(--red)}
+
+/* Выбор мышц у своего упражнения: три состояния чипа — основная, вспомогательная, нет */
+.mpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.mp{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);font-size:var(--fs-xs);font-weight:600;padding:6px 10px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.mp.p{background:var(--green);border-color:var(--green);color:#04120A}
+.mp.s{background:rgba(52,217,127,.16);border-color:rgba(52,217,127,.5);color:var(--green)}
+.mp-hint{color:var(--dim);font-size:var(--fs-xs);margin-top:8px;line-height:1.4}
 
 /* Праздник финиша: конфетти + подпрыгивающие чипы «топ» */
 .confetti{position:fixed;inset:0;z-index:60;pointer-events:none}

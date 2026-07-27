@@ -5,6 +5,7 @@
 
 import { MUSCLES, type Muscle } from '../types'
 import type { MuscleLoad, MuscleState } from '../lib/calc'
+import { daysAgoLabel } from '../lib/util'
 
 export const STATE_LABEL: Record<MuscleState, string> = {
   recovering: 'восстанавливается',
@@ -12,6 +13,11 @@ export const STATE_LABEL: Record<MuscleState, string> = {
   ready: 'готова',
   neglected: 'давно не было',
 }
+
+/** Давность нагрузки. У мышцы, которую только задевало вторичной работой,
+ *  значимой нагрузки нет — но это не то же самое, что «ни разу». */
+export const ageLabel = (l: MuscleLoad): string =>
+  l.daysSince !== null ? daysAgoLabel(l.daysSince) : l.everTrained ? 'только косвенно' : 'ни разу'
 
 const STATE_ORDER: MuscleState[] = ['recovering', 'worked', 'ready', 'neglected']
 

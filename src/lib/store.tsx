@@ -1,5 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { AppData, Exercise, MuscleGroup, Equipment, Program, Settings, WorkoutSession } from '../types'
+import type { AppData, Exercise, MuscleGroup, Equipment, Muscle, Program, Settings, WorkoutSession } from '../types'
+
+/** Поля своего упражнения, которыми владеет пользователь (id/владелец/дата — наши). */
+export interface NewExercise {
+  name: string
+  muscleGroup: MuscleGroup
+  equipment: Equipment
+  primaryMuscles?: Muscle[]
+  secondaryMuscles?: Muscle[]
+}
 import { clearActiveWorkout, clearData, loadData, saveData } from './storage'
 import { seedData } from './seed'
 import { nowISO, uid } from './util'
@@ -7,7 +16,8 @@ import { nowISO, uid } from './util'
 interface StoreCtx {
   data: AppData
   exerciseById: (id: string) => Exercise | undefined
-  addExercise: (e: { name: string; muscleGroup: MuscleGroup; equipment: Equipment }) => Exercise
+  addExercise: (e: NewExercise) => Exercise
+  updateExercise: (id: string, patch: NewExercise) => void
   deleteExercise: (id: string) => void
   saveProgram: (p: Program) => void
   deleteProgram: (id: string) => void
@@ -37,6 +47,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setData((d) => ({ ...d, exercises: [ne, ...d.exercises] }))
         return ne
       },
+      updateExercise: (id, patch) =>
+        setData((d) => ({
+          ...d,
+          // разметку мышц пишем поверх: пустой выбор должен уметь её снять
+          exercises: d.exercises.map((e) =>
+            e.id === id
+              ? { ...e, ...patch, primaryMuscles: patch.primaryMuscles, secondaryMuscles: patch.secondaryMuscles }
+              : e,
+          ),
+        })),
       deleteExercise: (id) => setData((d) => ({ ...d, exercises: d.exercises.filter((e) => e.id !== id) })),
       saveProgram: (p) =>
         setData((d) => {

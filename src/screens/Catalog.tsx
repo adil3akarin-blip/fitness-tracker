@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
-import { EQUIPMENT, MUSCLE_GROUPS, type Equipment, type Exercise, type MuscleGroup } from '../types'
+import { EQUIPMENT, MUSCLE_GROUPS, type Equipment, type Exercise, type Muscle, type MuscleGroup } from '../types'
+import { hasMuscleDetail } from '../lib/muscles'
+import MusclePicker from '../components/MusclePicker'
 
 export default function Catalog() {
-  const { data, addExercise, deleteExercise } = useStore()
+  const { data, addExercise, updateExercise, deleteExercise } = useStore()
   const nav = useNavigate()
 
   const tryDelete = (ex: Exercise) => {
@@ -25,9 +27,32 @@ export default function Catalog() {
   const [query, setQuery] = useState('')
   const [group, setGroup] = useState<MuscleGroup | 'Все'>('Все')
   const [showAdd, setShowAdd] = useState(false)
+  const [editId, setEditId] = useState<string | null>(null) // null = создаём новое
   const [name, setName] = useState('')
   const [mg, setMg] = useState<MuscleGroup>('Грудь')
   const [eq, setEq] = useState<Equipment>('Штанга')
+  const [pri, setPri] = useState<Muscle[]>([])
+  const [sec, setSec] = useState<Muscle[]>([])
+
+  const openAdd = () => {
+    setEditId(null)
+    setName('')
+    setMg('Грудь')
+    setEq('Штанга')
+    setPri([])
+    setSec([])
+    setShowAdd(true)
+  }
+
+  const openEdit = (ex: Exercise) => {
+    setEditId(ex.id)
+    setName(ex.name)
+    setMg(ex.muscleGroup)
+    setEq(ex.equipment)
+    setPri(ex.primaryMuscles ?? [])
+    setSec(ex.secondaryMuscles ?? [])
+    setShowAdd(true)
+  }
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -38,9 +63,18 @@ export default function Catalog() {
 
   const save = () => {
     if (!name.trim()) return
-    addExercise({ name: name.trim(), muscleGroup: mg, equipment: eq })
+    const fields = {
+      name: name.trim(),
+      muscleGroup: mg,
+      equipment: eq,
+      primaryMuscles: pri.length ? pri : undefined,
+      secondaryMuscles: sec.length ? sec : undefined,
+    }
+    if (editId) updateExercise(editId, fields)
+    else addExercise(fields)
     setName('')
     setShowAdd(false)
+    setEditId(null)
     setGroup('Все')
   }
 
@@ -49,7 +83,7 @@ export default function Catalog() {
       <div className="appbar push">
         <button className="back" onClick={() => nav('/programs')}><Icon name="chev-l" /></button>
         <div><h1>Упражнения</h1></div>
-        <button className="mini-edit" style={{ marginLeft: 'auto' }} onClick={() => setShowAdd((v) => !v)}><Icon name="plus" /></button>
+        <button className="mini-edit" style={{ marginLeft: 'auto' }} onClick={() => (showAdd ? setShowAdd(false) : openAdd())}><Icon name="plus" /></button>
       </div>
 
       <div className="search-wrap">
@@ -76,21 +110,36 @@ export default function Catalog() {
               <select value={eq} onChange={(e) => setEq(e.target.value as Equipment)}>{EQUIPMENT.map((m) => <option key={m}>{m}</option>)}</select>
             </div>
           </div>
-          <button className="btn btn-primary" onClick={save}><Icon name="check" /> Сохранить упражнение</button>
+          <MusclePicker group={mg} primary={pri} secondary={sec} onChange={(p, s) => { setPri(p); setSec(s) }} />
+          <button className="btn btn-primary" onClick={save}>
+            <Icon name="check" /> {editId ? 'Сохранить изменения' : 'Сохранить упражнение'}
+          </button>
         </div>
       )}
 
       <div className="card">
         {list.length === 0 && <div className="empty" style={{ padding: '20px 8px' }}><div className="ed">Ничего не найдено</div></div>}
         {list.map((e) => (
-          <div className="exrow" key={e.id}>
+          <div
+            className={'exrow' + (e.isCustom ? ' tap' : '')}
+            key={e.id}
+            onClick={e.isCustom ? () => openEdit(e) : undefined}
+          >
             <div className="eic"><Icon name="dumbbell" /></div>
             <div>
               <div className="en">{e.name}</div>
-              <div className="em">{e.muscleGroup} · {e.equipment} {e.isCustom && <span className="tag-mine">моё</span>}</div>
+              <div className="em">
+                {e.muscleGroup} · {e.equipment} {e.isCustom && <span className="tag-mine">моё</span>}
+                {/* карта считает такое упражнение размазанным по группе — правится тапом по строке */}
+                {e.isCustom && !hasMuscleDetail(e) && <span className="tag-rough">мышцы не уточнены</span>}
+              </div>
             </div>
             {e.isCustom && (
-              <button className="exdel" onClick={() => tryDelete(e)} aria-label="Удалить упражнение"><Icon name="x" /></button>
+              <button
+                className="exdel"
+                onClick={(ev) => { ev.stopPropagation(); tryDelete(e) }}
+                aria-label="Удалить упражнение"
+              ><Icon name="x" /></button>
             )}
           </div>
         ))}

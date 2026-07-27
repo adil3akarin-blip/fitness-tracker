@@ -45,8 +45,7 @@ export function plural(n: number, one: string, few: string, many: string) {
   return many
 }
 /** «сегодня» / «вчера» / «5 дней назад» — давность нагрузки на карте мышц */
-export function daysAgoLabel(days: number | null): string {
-  if (days === null) return 'ни разу'
+export function daysAgoLabel(days: number): string {
   if (days < 1) return 'сегодня'
   if (days < 2) return 'вчера'
   const n = Math.floor(days)

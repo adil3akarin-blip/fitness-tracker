@@ -80,6 +80,13 @@ export function isRepsBased(sessions: WorkoutSession[], exerciseId: ID): boolean
 // своим весом (подтягивания дают 8 «единиц» против 480 у тяги) и не сравним
 // между мышцами. У подходов есть внятный ориентир: 10–20 в неделю на мышцу.
 
+/** Локальная полночь — ключ дня: нагрузка копится по календарным дням. */
+const dayStart = (t: number) => {
+  const d = new Date(t)
+  d.setHours(0, 0, 0, 0)
+  return d.getTime()
+}
+
 /** Состояние мышцы на сегодня — основа цвета на карте. */
 export type MuscleState = 'recovering' | 'worked' | 'ready' | 'neglected'
 
@@ -87,13 +94,19 @@ export interface MuscleLoad {
   muscle: Muscle
   sets: number // с учётом доли: вторичная мышца даёт полподхода
   tonnage: number
-  daysSince: number | null // null = ни одного подхода за всю историю
+  daysSince: number | null // с последней значимой нагрузки; null = такой не было
+  everTrained: boolean // задевало ли мышцу вообще — «ни разу» ≠ «только вторично»
   state: MuscleState
 }
 
 const RECOVERY_DAYS = 2 // «ещё болит» — мышца под нагрузкой была вчера-позавчера
 const WORKED_DAYS = 4
 const NEGLECT_DAYS = 10
+/** Сколько долей-подходов за день считать настоящей нагрузкой. Ниже порога мышцу
+ *  «задело по касательной» — вторичная работа или откат по группе у своего
+ *  упражнения; такое не должно занимать мышцу на два дня наравне с целевой
+ *  работой. Две доли — это, например, 4 подхода жима для трицепса. */
+const SIGNIFICANT_SETS = 2
 /** Ориентир недельного объёма на мышцу (подходов). */
 export const SETS_LOW = 10
 export const SETS_HIGH = 20
@@ -115,7 +128,9 @@ export function muscleLoads(
   const since = now - windowDays * 864e5
   const sets: Partial<Record<Muscle, number>> = {}
   const ton: Partial<Record<Muscle, number>> = {}
-  const last: Partial<Record<Muscle, number>> = {}
+  // доли по дням за всю историю: свежесть отсчитывается от дня, где мышца
+  // набрала SIGNIFICANT_SETS, а не от любого касания
+  const byDay = new Map<Muscle, Map<number, { t: number; share: number }>>()
 
   for (const s of sessions)
     for (const set of s.sets) {
@@ -125,7 +140,14 @@ export function muscleLoads(
       const t = new Date(set.completedAt).getTime()
       if (t > now) continue
       for (const { muscle, share } of muscleShares(ex)) {
-        if (t > (last[muscle] ?? 0)) last[muscle] = t
+        let days = byDay.get(muscle)
+        if (!days) byDay.set(muscle, (days = new Map()))
+        const key = dayStart(t)
+        const d = days.get(key)
+        if (d) {
+          d.share += share
+          if (t > d.t) d.t = t
+        } else days.set(key, { t, share })
         if (t < since) continue
         sets[muscle] = (sets[muscle] ?? 0) + share
         ton[muscle] = (ton[muscle] ?? 0) + set.weight * set.reps * share
@@ -133,13 +155,18 @@ export function muscleLoads(
     }
 
   return MUSCLE_IDS.map((muscle) => {
-    const lt = last[muscle]
-    const daysSince = lt === undefined ? null : (now - lt) / 864e5
+    const days = byDay.get(muscle)
+    let lastReal = 0
+    if (days)
+      for (const d of days.values())
+        if (d.share >= SIGNIFICANT_SETS && d.t > lastReal) lastReal = d.t
+    const daysSince = lastReal ? (now - lastReal) / 864e5 : null
     return {
       muscle,
       sets: Math.round((sets[muscle] ?? 0) * 10) / 10,
       tonnage: Math.round(ton[muscle] ?? 0),
       daysSince,
+      everTrained: !!days,
       state: muscleStateOf(daysSince),
     }
   })

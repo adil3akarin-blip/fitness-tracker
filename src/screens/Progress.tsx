@@ -6,10 +6,10 @@ import {
   topRepsSeries, topWeightSeries,
 } from '../lib/calc'
 import { toDisplayWeight, weightLabel } from '../lib/units'
-import { daysAgoLabel, ruNum } from '../lib/util'
+import { ruNum } from '../lib/util'
 import { MUSCLES, type Muscle } from '../types'
 import { Collapse } from '../components/Collapse'
-import MuscleMap, { STATE_LABEL } from '../components/MuscleMap'
+import MuscleMap, { ageLabel, STATE_LABEL } from '../components/MuscleMap'
 
 type Range = 30 | 90 | 9999
 type Pt = { date: string; value: number }
@@ -139,7 +139,7 @@ export default function Progress() {
                 <span className={'mm-dot s-' + l.state} />
                 <span className="txt">
                   <span className="nm">{MUSCLES[l.muscle].label}</span>
-                  <span className="st">{STATE_LABEL[l.state]} · {daysAgoLabel(l.daysSince)}</span>
+                  <span className="st">{STATE_LABEL[l.state]} · {ageLabel(l)}</span>
                 </span>
                 <span className="sets">
                   <span className={vc}>{ruNum(l.sets)}</span><small> подх.</small>
