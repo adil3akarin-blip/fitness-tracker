@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
 import {
@@ -59,7 +60,10 @@ export default function Progress() {
   const [query, setQuery] = useState('')
   const [group, setGroup] = useState<string>('all')
   const [openId, setOpenId] = useState<string | undefined>()
-  const [sel, setSel] = useState<Muscle | null>(null)
+  const nav = useNavigate()
+  // с «Главной» можно прийти сразу за конкретной мышцей
+  const fromHome = (useLocation().state as { muscle?: Muscle } | null)?.muscle ?? null
+  const [sel, setSel] = useState<Muscle | null>(fromHome)
 
   // нагрузка по мышцам за неделю, самые загруженные сверху
   const loads = useMemo(
@@ -218,11 +222,22 @@ export default function Progress() {
 
       {shown.length === 0 ? (
         <div className="empty" style={{ padding: '32px 8px' }}>
-          <div className="ed">
-            {sel && !q
-              ? `${MUSCLES[sel].label} — за всё время ни одного упражнения на эту мышцу`
-              : 'Ничего не найдено'}
-          </div>
+          {sel && !q ? (
+            <>
+              <div className="ed">{MUSCLES[sel].label} — за всё время ни одного упражнения на эту мышцу</div>
+              {/* иначе экран «мышца забыта» сам оказывается тупиком: сказали проблему, не дали хода */}
+              <button
+                className="btn btn-ghost"
+                style={{ marginTop: 14 }}
+                onClick={() => nav('/catalog', { state: { group: MUSCLES[sel].group } })}
+              >
+                {/* «упражнения на Спина» требовало бы склонения ради одного слова */}
+                <Icon name="dumbbell" /> Каталог: {MUSCLES[sel].group}
+              </button>
+            </>
+          ) : (
+            <div className="ed">Ничего не найдено</div>
+          )}
         </div>
       ) : (
         <div className="exlist">

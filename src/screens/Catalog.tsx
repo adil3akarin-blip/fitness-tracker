@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Icon } from '../icons'
 import { EQUIPMENT, MUSCLE_GROUPS, type Equipment, type Exercise, type Muscle, type MuscleGroup } from '../types'
@@ -25,7 +25,9 @@ export default function Catalog() {
   }
 
   const [query, setQuery] = useState('')
-  const [group, setGroup] = useState<MuscleGroup | 'Все'>('Все')
+  // с «Прогресса» приходят за конкретной группой — не заставляем искать её чипом заново
+  const fromProgress = (useLocation().state as { group?: MuscleGroup } | null)?.group
+  const [group, setGroup] = useState<MuscleGroup | 'Все'>(fromProgress ?? 'Все')
   const [showAdd, setShowAdd] = useState(false)
   const [editId, setEditId] = useState<string | null>(null) // null = создаём новое
   const [name, setName] = useState('')

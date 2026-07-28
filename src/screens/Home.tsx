@@ -146,7 +146,22 @@ export default function Home() {
             <MuscleMap loads={loads} compact />
             <div className="mm-hint">
               {ready.length > 0 ? (
-                <>Готовы к работе: <b>{ready.map((l) => MUSCLES[l.muscle].label.toLowerCase()).join(', ')}</b></>
+                <>
+                  Готовы к работе:{' '}
+                  {/* каждая мышца ведёт в «Прогресс» уже с фильтром — иначе тапаешь
+                      по конкретной подсказке и ищешь её там глазами заново */}
+                  {ready.map((l, i) => (
+                    <span key={l.muscle}>
+                      {i > 0 && ', '}
+                      <b
+                        className="mm-go"
+                        onClick={(e) => { e.stopPropagation(); nav('/progress', { state: { muscle: l.muscle } }) }}
+                      >
+                        {MUSCLES[l.muscle].label.toLowerCase()}
+                      </b>
+                    </span>
+                  ))}
+                </>
               ) : (
                 'Всё под нагрузкой — сегодня логичнее отдохнуть'
               )}

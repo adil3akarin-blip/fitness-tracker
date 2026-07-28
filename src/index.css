@@ -564,6 +564,7 @@ input,select{font-family:inherit}
 .mm-dot.s-neglected{background:var(--violet)}
 .mm-hint{color:var(--muted);font-size:var(--fs-sm);text-align:center;line-height:1.4}
 .mm-hint b{color:var(--text);font-weight:600}
+.mm-hint .mm-go{color:var(--green);border-bottom:1px dashed rgba(52,217,127,.45);cursor:pointer}
 
 /* список мышц под картой — он же и тач-цель для выбора */
 .mlist{margin-top:14px;border-top:1px solid var(--border);padding-top:4px}
